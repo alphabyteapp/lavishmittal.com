@@ -3,36 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lavish Mittal</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Lavish Mittal - Personal Site</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23000000" fill-opacity="0.3" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 48px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .close-btn {
+            display: none;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .profile-name h1 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .verified-badge {
+            width: 20px;
+            height: 20px;
+            background: #1da1f2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .verified-badge::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .profile-bio {
+            color: #a0a0a0;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .links-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .link-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .link-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+            color: white;
+        }
+
+        .link-content {
+            flex: 1;
+        }
+
+        .link-title {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .link-description {
+            color: #808080;
+            font-size: 13px;
+        }
+
+        .link-arrow {
+            color: #606060;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .link-item:hover .link-arrow {
+            transform: translateX(4px);
+            color: #a0a0a0;
+        }
+
+        /* Icon colors */
+        .icon-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .icon-facebook { background: #1877f2; }
+        .icon-snapchat { background: #fffc00; color: #000 !important; }
+        .icon-website { background: #10b981; }
+        .icon-appstore { background: #000000; }
+        .icon-playstore { background: #34a853; }
+        .icon-youtube { background: #ff0000; }
+        .icon-email { background: #ea4335; }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 40px 24px;
+            }
+
+            .profile-name h1 {
+                font-size: 24px;
+            }
+
+            .profile-bio {
+                font-size: 13px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="profile">
-            <div class="profile-pic">
-                <!-- Add your profile picture here -->
-                <div class="initials">LM</div>
-            </div>
-            <h1>Lavish Mittal</h1>
-            <p class="tagline">Welcome to my personal space</p>
+        <div class="card">
+            <div class="close-btn"></div>
             
-            <div class="social-links">
-                <!-- Update these with your actual social media links -->
-                <a href="https://linkedin.com/in/yourusername" target="_blank" class="social-link">
-                    <i class="fab fa-linkedin"></i>
+            <div class="profile-section">
+                <div class="profile-image">
+                    <img src="lav.jpg" alt="Lavish Mittal">
+                </div>
+                <div class="profile-name">
+                    <h1>Lavish Mittal</h1>
+                    <div class="verified-badge"></div>
+                </div>
+                <p class="profile-bio">
+                    Programmer | Musician | Painter | Mountie
+                </p>
+            </div>
+
+            <div class="links-section">
+                <a href="https://instagram.com/lavishmittal" target="_blank" class="link-item">
+                    <div class="link-icon icon-instagram"><i class="fab fa-instagram"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">Instagram</div>
+                        <div class="link-description">Follow my journey</div>
+                    </div>
+                    <div class="link-arrow">→</div>
                 </a>
-                <a href="https://github.com/yourusername" target="_blank" class="social-link">
-                    <i class="fab fa-github"></i>
+
+                <a href="https://facebook.com/lavishlyaesthetic" target="_blank" class="link-item">
+                    <div class="link-icon icon-facebook"><i class="fab fa-facebook-f"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">Facebook</div>
+                        <div class="link-description">Connect with me</div>
+                    </div>
+                    <div class="link-arrow">→</div>
                 </a>
-                <a href="https://twitter.com/yourusername" target="_blank" class="social-link">
-                    <i class="fab fa-twitter"></i>
+
+                <a href="https://snapchat.com/add/lavishmittal" target="_blank" class="link-item">
+                    <div class="link-icon icon-snapchat"><i class="fab fa-snapchat-ghost"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">Snapchat</div>
+                        <div class="link-description">Add me on Snapchat</div>
+                    </div>
+                    <div class="link-arrow">→</div>
                 </a>
-                <a href="https://instagram.com/yourusername" target="_blank" class="social-link">
-                    <i class="fab fa-instagram"></i>
+
+                <a href="https://actmobile.ca" target="_blank" class="link-item">
+                    <div class="link-icon icon-website"><i class="fas fa-globe"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">ACT Mobile</div>
+                        <div class="link-description">My mobile app project</div>
+                    </div>
+                    <div class="link-arrow">→</div>
                 </a>
-                <a href="mailto:your.email@example.com" class="social-link">
-                    <i class="fas fa-envelope"></i>
+
+                <a href="https://apps.apple.com/app/actmobile" target="_blank" class="link-item">
+                    <div class="link-icon icon-appstore"><i class="fab fa-apple"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">App Store</div>
+                        <div class="link-description">Download on iOS</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <a href="https://play.google.com/store/apps/details?id=ca.actmobile" target="_blank" class="link-item">
+                    <div class="link-icon icon-playstore"><i class="fab fa-google-play"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">Google Play</div>
+                        <div class="link-description">Download on Android</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <a href="https://youtube.com/@lavishmittal" target="_blank" class="link-item">
+                    <div class="link-icon icon-youtube"><i class="fab fa-youtube"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">YouTube</div>
+                        <div class="link-description">Watch my videos</div>
+                    </div>
+                    <div class="link-arrow">→</div>
+                </a>
+
+                <a href="mailto:lavishmittal@gmail.com" class="link-item">
+                    <div class="link-icon icon-email"><i class="fas fa-envelope"></i></div>
+                    <div class="link-content">
+                        <div class="link-title">Email</div>
+                        <div class="link-description">lavishmittal@gmail.com</div>
+                    </div>
+                    <div class="link-arrow">→</div>
                 </a>
             </div>
         </div>
