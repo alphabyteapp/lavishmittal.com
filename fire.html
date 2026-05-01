@@ -1,0 +1,3496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIRE Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            /* Modern Color Palette - Material Design 3 inspired */
+            --primary: #1a73e8;
+            --primary-light: #4285f4;
+            --primary-dark: #1557b0;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --warning: #fbbc04;
+            
+            /* Neutral Palette */
+            --surface: #f5f5f5;
+            --surface-variant: #e8eaed;
+            --surface-container: #dadce0;
+            --on-surface: #202124;
+            --on-surface-variant: #5f6368;
+            --outline: #c4c7c9;
+            --outline-variant: #dadce0;
+            
+            /* Shadows - Elevated surfaces */
+            --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+            --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+            --shadow-lg: 0 2px 6px 2px rgba(60, 64, 67, 0.15), 0 8px 24px 4px rgba(60, 64, 67, 0.15);
+            --shadow-xl: 0 4px 16px 6px rgba(60, 64, 67, 0.15), 0 8px 36px 8px rgba(60, 64, 67, 0.15);
+            
+            /* Typography */
+            --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 48px;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: 
+                linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.03) 10px, rgba(255, 255, 255, 0.03) 20px);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: var(--spacing-lg);
+            color: var(--on-surface);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr minmax(320px, 420px);
+            gap: var(--spacing-lg);
+            align-items: start;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            min-width: 0;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            min-width: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: var(--spacing-2xl);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            font-family: var(--font-display);
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .card {
+            background: linear-gradient(135deg, #d1d3d6 0%, #c0c3c7 100%) !important;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 12px 48px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            color: var(--on-surface);
+            margin-bottom: var(--spacing-lg);
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: var(--font-display);
+            letter-spacing: -0.01em;
+            border-bottom: none;
+            padding-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .card h2::before {
+            content: '';
+            width: 5px;
+            height: 28px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius-full);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .input-group label {
+            font-weight: 500;
+            color: var(--on-surface);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            letter-spacing: 0.01em;
+        }
+
+        .tooltip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--surface-container);
+            color: var(--on-surface-variant);
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: help;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--outline);
+        }
+
+        .tooltip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--on-surface);
+            color: var(--surface);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            font-weight: 400;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            animation: tooltipFadeIn 0.2s ease-out;
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 14px 16px;
+            border: 1.5px solid var(--outline);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-body);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: var(--on-surface);
+        }
+
+        .input-group input:hover,
+        .input-group select:hover {
+            border-color: var(--on-surface-variant);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.08);
+        }
+
+        .input-group input.error,
+        .input-group select.error {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(234, 67, 53, 0.08);
+        }
+
+        .currency-selector {
+            grid-column: 1 / -1;
+            max-width: 300px;
+        }
+
+        .toggle-switch-container {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            border-radius: var(--radius-md);
+            border: 2px solid #c2d9ff;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 10px;
+        }
+
+        .toggle-switch-container:hover {
+            border-color: #a8c7fa;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+        }
+
+        .toggle-switch {
+            width: 52px;
+            height: 32px;
+            background: var(--outline);
+            border-radius: var(--radius-full);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch:hover {
+            background: var(--on-surface-variant);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+
+        .toggle-switch-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-switch-slider {
+            transform: translateX(30px);
+        }
+
+        .toggle-switch-container label {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .advanced-portfolio-section {
+            display: none;
+            grid-column: 1 / -1;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+
+        .advanced-portfolio-section.active {
+            display: block;
+        }
+
+        .asset-class-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .asset-class-card {
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .asset-class-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .asset-class-card h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-container label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .slider-value {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: var(--radius-full);
+            background: var(--outline-variant);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: grab;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 3px 8px rgba(26, 115, 232, 0.4);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: grab;
+            border: none;
+            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .allocation-summary {
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .allocation-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .allocation-total.valid {
+            color: #27ae60;
+        }
+
+        .allocation-total.invalid {
+            color: #e74c3c;
+        }
+
+        .allocation-message {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .simple-return-group {
+            display: block;
+        }
+
+        .simple-tax-group {
+            display: block;
+        }
+
+        .simple-return-group.hidden {
+            display: none;
+        }
+
+        .real-estate-special {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .real-estate-special .input-group {
+            margin: 0;
+        }
+
+        .real-estate-special input {
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .summary-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .summary-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            color: white;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .summary-item.warning {
+            background: linear-gradient(135deg, var(--accent) 0%, #c5221f 100%);
+        }
+
+        .summary-item.success {
+            background: linear-gradient(135deg, var(--secondary) 0%, #1e8e3e 100%);
+        }
+
+        .summary-item h3 {
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+            opacity: 0.95;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .summary-item p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            background: var(--surface-variant);
+            color: var(--on-surface);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.01em;
+            border-bottom: 2px solid var(--outline);
+        }
+
+        th:first-child {
+            border-top-left-radius: var(--radius-md);
+        }
+
+        th:last-child {
+            border-top-right-radius: var(--radius-md);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--outline-variant);
+            color: var(--on-surface);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--surface-variant);
+        }
+
+        .chart-container {
+            height: 450px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .chart-type-toggle {
+            display: flex;
+            gap: 4px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            padding: 4px;
+            border-radius: var(--radius-full);
+            border: 2px solid #c2d9ff;
+        }
+
+        .chart-type-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #5f6b8a;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: var(--font-body);
+        }
+
+        .chart-type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .chart-type-btn:hover:not(.active) {
+            color: var(--on-surface);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .retirement-phases-section {
+            display: none;
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #f0fff4 0%, #e6f9ed 100%);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            border: 3px solid #34a853;
+            margin-top: 15px;
+            box-shadow: 0 4px 16px rgba(52, 168, 83, 0.15);
+        }
+
+        .retirement-phases-section.active {
+            display: block;
+        }
+
+        .phase-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .phase-input-card {
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            border: 3px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .phase-input-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .phase-input-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .phase-input-card.phase-1 {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #f5f9fc 0%, #e8f4fb 100%);
+        }
+
+        .phase-input-card.phase-1:hover {
+            border-color: #2980b9;
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.25);
+        }
+
+        .phase-input-card.phase-2 {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fcf9f5 0%, #fbf3e8 100%);
+        }
+
+        .phase-input-card.phase-2:hover {
+            border-color: #e67e22;
+            box-shadow: 0 4px 16px rgba(243, 156, 18, 0.25);
+        }
+
+        .phase-input-card.phase-3 {
+            border-color: #9b59b6;
+            background: linear-gradient(135deg, #faf7fc 0%, #f4ebf8 100%);
+        }
+
+        .phase-input-card.phase-3:hover {
+            border-color: #8e44ad;
+            box-shadow: 0 4px 16px rgba(155, 89, 182, 0.25);
+        }
+
+        .phase-slider-container {
+            margin: 20px 0;
+        }
+
+        .phase-slider-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .phase-timeline {
+            position: relative;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: visible;
+        }
+
+        .phase-segment {
+            position: absolute;
+            height: 100%;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        .phase-segment.phase-1 {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .phase-segment.phase-2 {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .phase-segment.phase-3 {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .phase-handle {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 4px;
+            top: -10px;
+            cursor: ew-resize;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phase-handle:hover {
+            border-color: #5568d3;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .phase-handle::after {
+            content: '⋮';
+            font-size: 16px;
+            color: #667eea;
+        }
+
+        .phase-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .phase-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .phase-info-item {
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #ddd;
+        }
+
+        .phase-info-item.phase-1 {
+            border-left-color: #3498db;
+        }
+
+        .phase-info-item.phase-2 {
+            border-left-color: #f39c12;
+        }
+
+        .phase-info-item.phase-3 {
+            border-left-color: #9b59b6;
+        }
+
+        .phase-info-item strong {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .phase-info-item span {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .simple-expense-group {
+            display: block;
+        }
+
+        .simple-expense-group.hidden {
+            display: none;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            padding: 4px;
+            border-radius: var(--radius-full);
+            border: 2px solid #c2d9ff;
+            width: fit-content;
+        }
+
+        .toggle-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: #5f6b8a;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: var(--font-body);
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: var(--on-surface);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 1fr minmax(300px, 350px);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .right-column {
+                position: static;
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 350px;
+            }
+
+            .summary-item p {
+                font-size: 1.5rem;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 FIRE Calculator</h1>
+
+        <div class="main-layout">
+            <div class="left-column">
+                <div class="card">
+                    <h2>Input Parameters</h2>
+            <div class="input-grid">
+                <div class="input-group currency-selector">
+                    <label>
+                        Currency
+                        <span class="tooltip" data-tip="Select display currency">?</span>
+                    </label>
+                    <select id="currency">
+                        <option value="INR" selected>Indian Rupee (₹)</option>
+                        <option value="USD">US Dollar ($)</option>
+                        <option value="CAD">Canadian Dollar (C$)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>
+                        Current Age
+                        <span class="tooltip" data-tip="Your current age in years">?</span>
+                    </label>
+                    <input type="number" id="currentAge" value="30" min="18" max="100">
+                    <span class="error-message" id="currentAge-error"></span>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        Retirement Age
+                        <span class="tooltip" data-tip="Age when you plan to retire">?</span>
+                    </label>
+                    <input type="number" id="retirementAge" value="60" min="18" max="100">
+                    <span class="error-message" id="retirementAge-error"></span>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        Life Expectancy
+                        <span class="tooltip" data-tip="Expected age at end of life">?</span>
+                    </label>
+                    <input type="number" id="lifeExpectancy" value="85" min="18" max="120">
+                    <span class="error-message" id="lifeExpectancy-error"></span>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span id="corpusLabel">Current Investment Corpus (₹)</span>
+                        <span class="tooltip" data-tip="Your current retirement savings">?</span>
+                    </label>
+                    <input type="number" id="currentCorpus" value="8000000" min="0" step="1000">
+                    <span class="error-message" id="currentCorpus-error"></span>
+                </div>
+
+                <div class="input-group simple-expense-group" id="simpleExpenseGroup">
+                    <label>
+                        <span id="expensesLabel">Monthly Expenses (₹)</span>
+                        <span class="tooltip" data-tip="Post-tax monthly expenses in today's value">?</span>
+                    </label>
+                    <input type="number" id="monthlyExpenses" value="50000" min="0" step="100">
+                    <span class="error-message" id="monthlyExpenses-error"></span>
+                </div>
+
+                <div class="toggle-switch-container">
+                    <div class="toggle-switch" id="phasesToggle" onclick="toggleRetirementPhases()">
+                        <div class="toggle-switch-slider"></div>
+                    </div>
+                    <label for="phasesToggle" onclick="toggleRetirementPhases()">
+                        Enable Advanced Retirement Phases
+                    </label>
+                </div>
+
+                <div class="retirement-phases-section" id="retirementPhasesSection">
+                    <h3 style="margin: 0 0 15px 0; color: #27ae60;">
+                        <span class="tooltip" data-tip="Define different expense levels for early, mid, and late retirement">ℹ️</span>
+                        Retirement Phase Planning
+                    </h3>
+                    
+                    <div class="phase-inputs-grid">
+                        <div class="phase-input-card phase-1">
+                            <h4>📈 Phase 1: Early Retirement</h4>
+                            <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Active years, higher spending</p>
+                            <div class="input-group" style="margin: 0;">
+                                <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
+                                <input type="number" id="phase1Expense" value="60000" min="0" step="100">
+                            </div>
+                        </div>
+                        
+                        <div class="phase-input-card phase-2">
+                            <h4>📊 Phase 2: Mid Retirement</h4>
+                            <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Moderate spending</p>
+                            <div class="input-group" style="margin: 0;">
+                                <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
+                                <input type="number" id="phase2Expense" value="50000" min="0" step="100">
+                            </div>
+                        </div>
+                        
+                        <div class="phase-input-card phase-3">
+                            <h4>📉 Phase 3: Late Retirement</h4>
+                            <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Reduced spending</p>
+                            <div class="input-group" style="margin: 0;">
+                                <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
+                                <input type="number" id="phase3Expense" value="40000" min="0" step="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phase-slider-container">
+                        <div class="phase-slider-label">
+                            Phase Boundaries (Drag handles to adjust)
+                        </div>
+                        
+                        <div class="phase-timeline" id="phaseTimeline">
+                            <div class="phase-segment phase-1" id="phaseSegment1">Phase 1</div>
+                            <div class="phase-segment phase-2" id="phaseSegment2">Phase 2</div>
+                            <div class="phase-segment phase-3" id="phaseSegment3">Phase 3</div>
+                            <div class="phase-handle" id="phaseHandle1" data-handle="1"></div>
+                            <div class="phase-handle" id="phaseHandle2" data-handle="2"></div>
+                        </div>
+                        
+                        <div class="phase-labels">
+                            <span id="phaseStartLabel">Age 60</span>
+                            <span id="phaseEndLabel">Age 85</span>
+                        </div>
+
+                        <div class="phase-info">
+                            <div class="phase-info-item phase-1">
+                                <strong>Phase 1: Early Retirement</strong>
+                                <span id="phase1Range">Age 60 → 70</span>
+                            </div>
+                            <div class="phase-info-item phase-2">
+                                <strong>Phase 2: Mid Retirement</strong>
+                                <span id="phase2Range">Age 70 → 78</span>
+                            </div>
+                            <div class="phase-info-item phase-3">
+                                <strong>Phase 3: Late Retirement</strong>
+                                <span id="phase3Range">Age 78 → 85</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-switch-container">
+                    <div class="toggle-switch" id="advancedToggle" onclick="toggleAdvancedMode()">
+                        <div class="toggle-switch-slider"></div>
+                    </div>
+                    <label for="advancedToggle" onclick="toggleAdvancedMode()">
+                        Enable Advanced Portfolio Mode
+                    </label>
+                </div>
+
+                <div class="input-group simple-return-group" id="simpleReturnGroup">
+                    <label>
+                        Expected Annual Return (%)
+                        <span class="tooltip" data-tip="Expected annual investment return rate">?</span>
+                    </label>
+                    <input type="number" id="annualReturn" value="9" min="-20" max="30" step="0.1">
+                    <span class="error-message" id="annualReturn-error"></span>
+                </div>
+
+                <div class="advanced-portfolio-section" id="advancedPortfolio">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Portfolio Allocation</h3>
+                    <div class="asset-class-grid">
+                        <div class="asset-class-card">
+                            <h4>Fixed Income</h4>
+                            <div class="slider-container">
+                                <label>
+                                    <span>Allocation</span>
+                                    <span class="slider-value" id="fixedIncomeAlloc-value">20%</span>
+                                </label>
+                                <input type="range" id="fixedIncomeAlloc" min="0" max="100" value="20" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Expected Return (%)</label>
+                                <input type="number" id="fixedIncomeReturn" value="6" min="-10" max="20" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Tax Rate (%)</label>
+                                <input type="number" id="fixedIncomeTax" value="30" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="asset-class-card">
+                            <h4>Real Estate <small style="font-size: 0.7rem; opacity: 0.7;">(Illiquid)</small></h4>
+                            <div class="slider-container">
+                                <label>
+                                    <span>Allocation</span>
+                                    <span class="slider-value" id="realEstateAlloc-value">20%</span>
+                                </label>
+                                <input type="range" id="realEstateAlloc" min="0" max="100" value="20" step="1">
+                            </div>
+                            <div class="real-estate-special">
+                                <div class="input-group">
+                                    <label style="font-size: 0.85rem;">
+                                        Capital Appreciation (%)
+                                        <span class="tooltip" data-tip="Property value growth rate (not withdrawable)" style="font-size: 0.7rem;">?</span>
+                                    </label>
+                                    <input type="number" id="realEstateAppreciation" value="5" min="-10" max="20" step="0.1">
+                                </div>
+                                <div class="input-group">
+                                    <label style="font-size: 0.85rem;">
+                                        Rental Yield (%)
+                                        <span class="tooltip" data-tip="Annual rental income as % of property value (passive cash flow)" style="font-size: 0.7rem;">?</span>
+                                    </label>
+                                    <input type="number" id="realEstateYield" value="3" min="0" max="15" step="0.1">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Tax Rate (%)</label>
+                                <input type="number" id="realEstateTax" value="20" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="asset-class-card">
+                            <h4>Large Cap Equities</h4>
+                            <div class="slider-container">
+                                <label>
+                                    <span>Allocation</span>
+                                    <span class="slider-value" id="largeCapAlloc-value">30%</span>
+                                </label>
+                                <input type="range" id="largeCapAlloc" min="0" max="100" value="30" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Expected Return (%)</label>
+                                <input type="number" id="largeCapReturn" value="10" min="-20" max="30" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Tax Rate (%)</label>
+                                <input type="number" id="largeCapTax" value="10" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="asset-class-card">
+                            <h4>Mid Cap Equities</h4>
+                            <div class="slider-container">
+                                <label>
+                                    <span>Allocation</span>
+                                    <span class="slider-value" id="midCapAlloc-value">20%</span>
+                                </label>
+                                <input type="range" id="midCapAlloc" min="0" max="100" value="20" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Expected Return (%)</label>
+                                <input type="number" id="midCapReturn" value="12" min="-30" max="40" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Tax Rate (%)</label>
+                                <input type="number" id="midCapTax" value="10" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+
+                        <div class="asset-class-card">
+                            <h4>Small Cap Equities</h4>
+                            <div class="slider-container">
+                                <label>
+                                    <span>Allocation</span>
+                                    <span class="slider-value" id="smallCapAlloc-value">10%</span>
+                                </label>
+                                <input type="range" id="smallCapAlloc" min="0" max="100" value="10" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Expected Return (%)</label>
+                                <input type="number" id="smallCapReturn" value="15" min="-40" max="50" step="0.1">
+                            </div>
+                            <div class="input-group">
+                                <label style="font-size: 0.85rem;">Tax Rate (%)</label>
+                                <input type="number" id="smallCapTax" value="10" min="0" max="50" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="allocation-summary">
+                        <div class="allocation-total valid" id="allocationTotal">100%</div>
+                        <div class="allocation-message" id="allocationMessage">Perfect! Allocation equals 100%</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        Inflation Rate (%)
+                        <span class="tooltip" data-tip="Expected annual inflation rate">?</span>
+                    </label>
+                    <input type="number" id="inflationRate" value="6" min="0" max="20" step="0.1">
+                    <span class="error-message" id="inflationRate-error"></span>
+                </div>
+
+                <div class="input-group simple-tax-group" id="simpleTaxGroup">
+                    <label>
+                        Tax Rate on Withdrawals (%)
+                        <span class="tooltip" data-tip="Effective tax rate on retirement withdrawals">?</span>
+                    </label>
+                    <input type="number" id="taxRate" value="20" min="0" max="50" step="0.1">
+                    <span class="error-message" id="taxRate-error"></span>
+                </div>
+            </div>
+                </div>
+
+                <div class="card">
+                    <h2>Year-by-Year Breakdown</h2>
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="setView('yearly')">Yearly View</button>
+                <button class="toggle-btn" onclick="setView('monthly')">Monthly View</button>
+            </div>
+            <div class="table-container">
+                <table id="breakdownTable">
+                    <thead id="tableHeader">
+                        <tr>
+                            <th>Age</th>
+                            <th>Start Balance</th>
+                            <th>Withdrawals</th>
+                            <th>Taxes Paid</th>
+                            <th>End Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Corpus Over Time</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('corpus', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('corpus', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="corpusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Withdrawals & Taxes</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('withdrawal', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('withdrawal', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="withdrawalChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Inflation-Adjusted Expenses</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('expense', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('expense', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Real Value of Corpus (Today's Money)</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('realValue', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('realValue', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="realValueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Investment Returns Over Time</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('returns', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('returns', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="returnsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" id="portfolioAllocationCard" style="display: none;">
+                    <h2>Portfolio Allocation</h2>
+                    <div class="chart-container" style="height: 350px;">
+                        <canvas id="allocationPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" id="assetContributionCard" style="display: none;">
+                    <h2>Asset Class Contribution Over Time</h2>
+                    <div class="chart-container">
+                        <canvas id="assetContributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h2>Custom Chart Builder</h2>
+                        <div class="chart-type-toggle">
+                            <button class="chart-type-btn active" onclick="toggleChartType('custom', 'line')">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('custom', 'bar')">Bar</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customCorpus" onchange="updateCustomChart()" checked>
+                            <span style="color: #667eea; font-weight: 600;">● Corpus Value</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customRealCorpus" onchange="updateCustomChart()">
+                            <span style="color: #9b59b6; font-weight: 600;">● Real Corpus Value</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customWithdrawals" onchange="updateCustomChart()">
+                            <span style="color: #27ae60; font-weight: 600;">● Withdrawal (Pre-Tax)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customTaxes" onchange="updateCustomChart()">
+                            <span style="color: #e74c3c; font-weight: 600;">● Taxes Paid</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customPostTax" onchange="updateCustomChart()">
+                            <span style="color: #f39c12; font-weight: 600;">● Post-Tax Withdrawal</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customReturns" onchange="updateCustomChart()">
+                            <span style="color: #2ecc71; font-weight: 600;">● Yearly Return</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customRealReturns" onchange="updateCustomChart()">
+                            <span style="color: #1abc9c; font-weight: 600;">● Real Yearly Return</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="customRentalIncome" onchange="updateCustomChart()">
+                            <span style="color: #16a085; font-weight: 600;">● Rental Income</span>
+                        </label>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="customChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card">
+                    <h2>Summary</h2>
+                    <div class="summary-grid" id="summaryGrid">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Suggestions</h2>
+                    <div class="summary-grid" id="suggestionsGrid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let corpusChart, withdrawalChart, expenseChart, realValueChart, returnsChart, customChart, allocationPieChart, assetContributionChart;
+        let currentView = 'yearly';
+        let calculationResults = null;
+        let selectedCurrency = 'INR';
+        let advancedMode = false;
+        let retirementPhasesMode = false;
+
+        // Track chart types for each chart
+        let chartTypes = {
+            custom: 'line',
+            corpus: 'line',
+            withdrawal: 'line',
+            expense: 'line',
+            realValue: 'line',
+            returns: 'line'
+        };
+
+        // Retirement phases state
+        let phaseBoundaries = {
+            phase1End: 70,  // Default: Phase 1 ends at age 70
+            phase2End: 78   // Default: Phase 2 ends at age 78
+        };
+
+        let isDragging = false;
+        let currentHandle = null;
+
+        const currencySymbols = {
+            'INR': '₹',
+            'USD': '$',
+            'CAD': 'C$'
+        };
+
+        function toggleChartType(chartName, type) {
+            chartTypes[chartName] = type;
+            
+            // Update button states
+            const buttons = event.target.parentElement.querySelectorAll('.chart-type-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Redraw only the specific chart if calculation results exist
+            if (calculationResults) {
+                updateSingleChart(chartName);
+            }
+        }
+
+        function updateSingleChart(chartName) {
+            const yearlyData = calculationResults.yearlyData;
+            const { inflationRate, currentAge } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            const labels = yearlyData.map(d => d.age);
+            const corpusData = yearlyData.map(d => d.endBalance);
+            const withdrawalData = yearlyData.map(d => d.withdrawals);
+            const taxData = yearlyData.map(d => d.taxes);
+            const expenseData = yearlyData.map(d => d.expense * 12);
+            
+            const realValueData = yearlyData.map(d => {
+                const yearsFromNow = d.yearsSinceStart;
+                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
+                return d.endBalance / deflator;
+            });
+
+            const returnsData = yearlyData.map(d => d.returns || 0);
+            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
+
+            switch(chartName) {
+                case 'custom':
+                    updateCustomChart();
+                    break;
+
+                case 'corpus':
+                    if (corpusChart) corpusChart.destroy();
+                    const ctx1 = document.getElementById('corpusChart').getContext('2d');
+                    corpusChart = new Chart(ctx1, {
+                        type: chartTypes.corpus,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Corpus Value',
+                                data: corpusData,
+                                borderColor: '#667eea',
+                                backgroundColor: chartTypes.corpus === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                                borderWidth: chartTypes.corpus === 'line' ? 3 : 1,
+                                fill: chartTypes.corpus === 'line',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Corpus: ' + symbol + formatCurrency(context.parsed.y);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return symbol + formatCurrencyShort(value);
+                                        }
+                                    }
+                                },
+                                x: { title: { display: true, text: 'Age' } }
+                            }
+                        }
+                    });
+                    break;
+
+                case 'withdrawal':
+                    if (withdrawalChart) withdrawalChart.destroy();
+                    const ctx2 = document.getElementById('withdrawalChart').getContext('2d');
+                    withdrawalChart = new Chart(ctx2, {
+                        type: chartTypes.withdrawal,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Annual Withdrawals',
+                                data: withdrawalData,
+                                borderColor: '#27ae60',
+                                backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
+                                borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
+                                fill: chartTypes.withdrawal === 'line',
+                                tension: 0.4
+                            }, {
+                                label: 'Annual Taxes',
+                                data: taxData,
+                                borderColor: '#e74c3c',
+                                backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
+                                borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
+                                fill: chartTypes.withdrawal === 'line',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return symbol + formatCurrencyShort(value);
+                                        }
+                                    }
+                                },
+                                x: { title: { display: true, text: 'Age' } }
+                            }
+                        }
+                    });
+                    break;
+
+                case 'expense':
+                    if (expenseChart) expenseChart.destroy();
+                    const ctx3 = document.getElementById('expenseChart').getContext('2d');
+                    expenseChart = new Chart(ctx3, {
+                        type: chartTypes.expense,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Annual Expenses',
+                                data: expenseData,
+                                borderColor: '#f39c12',
+                                backgroundColor: chartTypes.expense === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
+                                borderWidth: chartTypes.expense === 'line' ? 3 : 1,
+                                fill: chartTypes.expense === 'line',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Expenses: ' + symbol + formatCurrency(context.parsed.y);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return symbol + formatCurrencyShort(value);
+                                        }
+                                    }
+                                },
+                                x: { title: { display: true, text: 'Age' } }
+                            }
+                        }
+                    });
+                    break;
+
+                case 'realValue':
+                    if (realValueChart) realValueChart.destroy();
+                    const ctx4 = document.getElementById('realValueChart').getContext('2d');
+                    realValueChart = new Chart(ctx4, {
+                        type: chartTypes.realValue,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Nominal Corpus Value',
+                                data: corpusData,
+                                borderColor: '#667eea',
+                                backgroundColor: chartTypes.realValue === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                                borderWidth: chartTypes.realValue === 'line' ? 2 : 1,
+                                fill: chartTypes.realValue === 'line' ? false : true,
+                                tension: 0.4,
+                                borderDash: chartTypes.realValue === 'line' ? [5, 5] : []
+                            }, {
+                                label: 'Real Value (Today\'s Money)',
+                                data: realValueData,
+                                borderColor: '#e74c3c',
+                                backgroundColor: chartTypes.realValue === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
+                                borderWidth: chartTypes.realValue === 'line' ? 3 : 1,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return symbol + formatCurrencyShort(value);
+                                        }
+                                    }
+                                },
+                                x: { title: { display: true, text: 'Age' } }
+                            }
+                        }
+                    });
+                    break;
+
+                case 'returns':
+                    if (returnsChart) returnsChart.destroy();
+                    const ctx5 = document.getElementById('returnsChart').getContext('2d');
+                    returnsChart = new Chart(ctx5, {
+                        type: chartTypes.returns,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Nominal Returns',
+                                data: returnsData,
+                                backgroundColor: chartTypes.returns === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                                borderColor: '#667eea',
+                                borderWidth: chartTypes.returns === 'line' ? 3 : 1,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: chartTypes.returns === 'line' ? 4 : 0,
+                                pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
+                            }, {
+                                label: 'Inflation-Adjusted Returns',
+                                data: realReturnsData,
+                                backgroundColor: chartTypes.returns === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
+                                borderColor: '#2ecc71',
+                                borderWidth: chartTypes.returns === 'line' ? 3 : 1,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: chartTypes.returns === 'line' ? 4 : 0,
+                                pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.parsed.y;
+                                            const sign = value >= 0 ? '+' : '';
+                                            return context.dataset.label + ': ' + sign + symbol + formatCurrency(Math.abs(value));
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            const sign = value >= 0 ? '+' : '-';
+                                            return sign + symbol + formatCurrencyShort(Math.abs(value));
+                                        }
+                                    },
+                                    title: { display: true, text: 'Returns' }
+                                },
+                                x: { title: { display: true, text: 'Age' } }
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
+
+        function updateCustomChart() {
+            if (!calculationResults) return;
+
+            const yearlyData = calculationResults.yearlyData;
+            const { inflationRate } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            const labels = yearlyData.map(d => d.age);
+            
+            // Prepare all data series
+            const corpusData = yearlyData.map(d => d.endBalance);
+            const realCorpusData = yearlyData.map(d => {
+                const yearsFromNow = d.yearsSinceStart;
+                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
+                return d.endBalance / deflator;
+            });
+            const withdrawalData = yearlyData.map(d => d.withdrawals);
+            const taxData = yearlyData.map(d => d.taxes);
+            const postTaxData = yearlyData.map(d => d.withdrawals - d.taxes);
+            const returnsData = yearlyData.map(d => d.returns || 0);
+            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
+            const rentalIncomeData = yearlyData.map(d => d.rentalIncome || 0);
+
+            // Build datasets based on selected checkboxes
+            const datasets = [];
+
+            if (document.getElementById('customCorpus').checked) {
+                datasets.push({
+                    label: 'Corpus Value',
+                    data: corpusData,
+                    borderColor: '#667eea',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customRealCorpus').checked) {
+                datasets.push({
+                    label: 'Real Corpus Value',
+                    data: realCorpusData,
+                    borderColor: '#9b59b6',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(155, 89, 182, 0.1)' : 'rgba(155, 89, 182, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customWithdrawals').checked) {
+                datasets.push({
+                    label: 'Withdrawal (Pre-Tax)',
+                    data: withdrawalData,
+                    borderColor: '#27ae60',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customTaxes').checked) {
+                datasets.push({
+                    label: 'Taxes Paid',
+                    data: taxData,
+                    borderColor: '#e74c3c',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customPostTax').checked) {
+                datasets.push({
+                    label: 'Post-Tax Withdrawal',
+                    data: postTaxData,
+                    borderColor: '#f39c12',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customReturns').checked) {
+                datasets.push({
+                    label: 'Yearly Return',
+                    data: returnsData,
+                    borderColor: '#2ecc71',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customRealReturns').checked) {
+                datasets.push({
+                    label: 'Real Yearly Return',
+                    data: realReturnsData,
+                    borderColor: '#1abc9c',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(26, 188, 156, 0.1)' : 'rgba(26, 188, 156, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            if (document.getElementById('customRentalIncome').checked) {
+                datasets.push({
+                    label: 'Rental Income',
+                    data: rentalIncomeData,
+                    borderColor: '#16a085',
+                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(22, 160, 133, 0.1)' : 'rgba(22, 160, 133, 0.6)',
+                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
+                    fill: chartTypes.custom === 'line',
+                    tension: 0.4
+                });
+            }
+
+            // Destroy and recreate chart
+            if (customChart) customChart.destroy();
+            
+            const ctx = document.getElementById('customChart').getContext('2d');
+            customChart = new Chart(ctx, {
+                type: chartTypes.custom,
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(Math.abs(context.parsed.y));
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCurrencyLabels() {
+            const symbol = currencySymbols[selectedCurrency];
+            document.getElementById('corpusLabel').textContent = `Current Investment Corpus (${symbol})`;
+            document.getElementById('expensesLabel').textContent = `Monthly Expenses (${symbol})`;
+        }
+
+        document.getElementById('currency').addEventListener('change', function() {
+            selectedCurrency = this.value;
+            updateCurrencyLabels();
+            if (calculationResults) {
+                updateUI();
+            }
+        });
+
+        function toggleAdvancedMode() {
+            advancedMode = !advancedMode;
+            const toggle = document.getElementById('advancedToggle');
+            const simpleGroup = document.getElementById('simpleReturnGroup');
+            const simpleTaxGroup = document.getElementById('simpleTaxGroup');
+            const advancedSection = document.getElementById('advancedPortfolio');
+            const portfolioCard = document.getElementById('portfolioAllocationCard');
+            const assetCard = document.getElementById('assetContributionCard');
+
+            if (advancedMode) {
+                toggle.classList.add('active');
+                simpleGroup.classList.add('hidden');
+                simpleTaxGroup.style.display = 'none';
+                advancedSection.classList.add('active');
+                portfolioCard.style.display = 'block';
+                assetCard.style.display = 'block';
+            } else {
+                toggle.classList.remove('active');
+                simpleGroup.classList.remove('hidden');
+                simpleTaxGroup.style.display = 'block';
+                advancedSection.classList.remove('active');
+                portfolioCard.style.display = 'none';
+                assetCard.style.display = 'none';
+            }
+
+            calculateRetirement();
+        }
+
+        function toggleRetirementPhases() {
+            retirementPhasesMode = !retirementPhasesMode;
+            const toggle = document.getElementById('phasesToggle');
+            const simpleExpenseGroup = document.getElementById('simpleExpenseGroup');
+            const phasesSection = document.getElementById('retirementPhasesSection');
+
+            if (retirementPhasesMode) {
+                toggle.classList.add('active');
+                simpleExpenseGroup.classList.add('hidden');
+                phasesSection.classList.add('active');
+                initializePhaseSlider();
+            } else {
+                toggle.classList.remove('active');
+                simpleExpenseGroup.classList.remove('hidden');
+                phasesSection.classList.remove('active');
+            }
+
+            calculateRetirement();
+        }
+
+        function initializePhaseSlider() {
+            const retirementAge = parseInt(document.getElementById('retirementAge').value) || 60;
+            const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value) || 85;
+            
+            // Set default boundaries if not already set
+            if (!phaseBoundaries.phase1End || phaseBoundaries.phase1End <= retirementAge) {
+                phaseBoundaries.phase1End = Math.min(retirementAge + 10, lifeExpectancy - 10);
+            }
+            if (!phaseBoundaries.phase2End || phaseBoundaries.phase2End <= phaseBoundaries.phase1End) {
+                phaseBoundaries.phase2End = Math.min(phaseBoundaries.phase1End + 8, lifeExpectancy - 2);
+            }
+
+            updatePhaseSlider();
+            setupPhaseSliderDrag();
+        }
+
+        function updatePhaseSlider() {
+            const retirementAge = parseInt(document.getElementById('retirementAge').value) || 60;
+            const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value) || 85;
+            const totalYears = lifeExpectancy - retirementAge;
+
+            if (totalYears <= 0) return;
+
+            // Calculate percentages for each phase
+            const phase1Years = phaseBoundaries.phase1End - retirementAge;
+            const phase2Years = phaseBoundaries.phase2End - phaseBoundaries.phase1End;
+            const phase3Years = lifeExpectancy - phaseBoundaries.phase2End;
+
+            const phase1Percent = (phase1Years / totalYears) * 100;
+            const phase2Percent = (phase2Years / totalYears) * 100;
+            const phase3Percent = (phase3Years / totalYears) * 100;
+
+            // Update segments
+            const segment1 = document.getElementById('phaseSegment1');
+            const segment2 = document.getElementById('phaseSegment2');
+            const segment3 = document.getElementById('phaseSegment3');
+
+            segment1.style.left = '0%';
+            segment1.style.width = phase1Percent + '%';
+
+            segment2.style.left = phase1Percent + '%';
+            segment2.style.width = phase2Percent + '%';
+
+            segment3.style.left = (phase1Percent + phase2Percent) + '%';
+            segment3.style.width = phase3Percent + '%';
+
+            // Update handles
+            const handle1 = document.getElementById('phaseHandle1');
+            const handle2 = document.getElementById('phaseHandle2');
+
+            handle1.style.left = `calc(${phase1Percent}% - 10px)`;
+            handle2.style.left = `calc(${phase1Percent + phase2Percent}% - 10px)`;
+
+            // Update labels
+            document.getElementById('phaseStartLabel').textContent = `Age ${retirementAge}`;
+            document.getElementById('phaseEndLabel').textContent = `Age ${lifeExpectancy}`;
+
+            document.getElementById('phase1Range').textContent = `Age ${retirementAge} → ${phaseBoundaries.phase1End}`;
+            document.getElementById('phase2Range').textContent = `Age ${phaseBoundaries.phase1End} → ${phaseBoundaries.phase2End}`;
+            document.getElementById('phase3Range').textContent = `Age ${phaseBoundaries.phase2End} → ${lifeExpectancy}`;
+        }
+
+        function setupPhaseSliderDrag() {
+            const timeline = document.getElementById('phaseTimeline');
+            const handle1 = document.getElementById('phaseHandle1');
+            const handle2 = document.getElementById('phaseHandle2');
+
+            [handle1, handle2].forEach(handle => {
+                handle.addEventListener('mousedown', startDrag);
+            });
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            currentHandle = parseInt(e.target.dataset.handle);
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging || !currentHandle) return;
+
+            const timeline = document.getElementById('phaseTimeline');
+            const rect = timeline.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+            const retirementAge = parseInt(document.getElementById('retirementAge').value) || 60;
+            const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value) || 85;
+            const totalYears = lifeExpectancy - retirementAge;
+
+            const newAge = Math.round(retirementAge + (percent / 100) * totalYears);
+
+            if (currentHandle === 1) {
+                // Handle 1: must be between retirement age and phase2End
+                if (newAge > retirementAge && newAge < phaseBoundaries.phase2End - 1) {
+                    phaseBoundaries.phase1End = newAge;
+                }
+            } else if (currentHandle === 2) {
+                // Handle 2: must be between phase1End and life expectancy
+                if (newAge > phaseBoundaries.phase1End + 1 && newAge < lifeExpectancy) {
+                    phaseBoundaries.phase2End = newAge;
+                }
+            }
+
+            updatePhaseSlider();
+        }
+
+        function stopDrag() {
+            if (isDragging) {
+                isDragging = false;
+                currentHandle = null;
+                calculateRetirement();
+            }
+        }
+
+        function updateAllocationDisplay() {
+            const allocations = {
+                fixedIncome: parseFloat(document.getElementById('fixedIncomeAlloc').value),
+                realEstate: parseFloat(document.getElementById('realEstateAlloc').value),
+                largeCap: parseFloat(document.getElementById('largeCapAlloc').value),
+                midCap: parseFloat(document.getElementById('midCapAlloc').value),
+                smallCap: parseFloat(document.getElementById('smallCapAlloc').value)
+            };
+
+            document.getElementById('fixedIncomeAlloc-value').textContent = allocations.fixedIncome + '%';
+            document.getElementById('realEstateAlloc-value').textContent = allocations.realEstate + '%';
+            document.getElementById('largeCapAlloc-value').textContent = allocations.largeCap + '%';
+            document.getElementById('midCapAlloc-value').textContent = allocations.midCap + '%';
+            document.getElementById('smallCapAlloc-value').textContent = allocations.smallCap + '%';
+
+            const total = allocations.fixedIncome + allocations.realEstate + allocations.largeCap + 
+                         allocations.midCap + allocations.smallCap;
+
+            const totalEl = document.getElementById('allocationTotal');
+            const messageEl = document.getElementById('allocationMessage');
+
+            totalEl.textContent = total.toFixed(1) + '%';
+
+            if (Math.abs(total - 100) < 0.1) {
+                totalEl.className = 'allocation-total valid';
+                messageEl.textContent = 'Perfect! Allocation equals 100%';
+            } else if (total < 100) {
+                totalEl.className = 'allocation-total invalid';
+                messageEl.textContent = 'Allocation is below 100%. Add ' + (100 - total).toFixed(1) + '% more.';
+            } else {
+                totalEl.className = 'allocation-total invalid';
+                messageEl.textContent = 'Allocation exceeds 100%. Reduce by ' + (total - 100).toFixed(1) + '%.';
+            }
+
+            return Math.abs(total - 100) < 0.1;
+        }
+
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', function() {
+                updateAllocationDisplay();
+                calculateRetirement();
+            });
+        });
+
+        function validateInputs() {
+            const currentAge = parseFloat(document.getElementById('currentAge').value);
+            const retirementAge = parseFloat(document.getElementById('retirementAge').value);
+            const lifeExpectancy = parseFloat(document.getElementById('lifeExpectancy').value);
+            const currentCorpus = parseFloat(document.getElementById('currentCorpus').value);
+            const monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value);
+
+            let isValid = true;
+            const errors = {};
+
+            if (currentAge < 18 || currentAge > 100) {
+                errors.currentAge = 'Age must be between 18 and 100';
+                isValid = false;
+            }
+
+            if (retirementAge < currentAge) {
+                errors.retirementAge = 'Retirement age must be equal to or greater than current age';
+                isValid = false;
+            }
+
+            if (lifeExpectancy <= retirementAge) {
+                errors.lifeExpectancy = 'Life expectancy must be greater than retirement age';
+                isValid = false;
+            }
+
+            if (currentCorpus < 0) {
+                errors.currentCorpus = 'Corpus cannot be negative';
+                isValid = false;
+            }
+
+            if (monthlyExpenses < 0) {
+                errors.monthlyExpenses = 'Expenses cannot be negative';
+                isValid = false;
+            }
+
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+
+            document.querySelectorAll('input').forEach(input => {
+                input.classList.remove('error');
+            });
+
+            Object.keys(errors).forEach(key => {
+                const errorEl = document.getElementById(`${key}-error`);
+                const inputEl = document.getElementById(key);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = errors[key];
+                    errorEl.style.display = 'block';
+                    inputEl.classList.add('error');
+                }
+            });
+
+            return isValid;
+        }
+
+        function calculateRetirement() {
+            if (!validateInputs()) {
+                return;
+            }
+
+            if (advancedMode && !updateAllocationDisplay()) {
+                return;
+            }
+
+            const currentAge = parseFloat(document.getElementById('currentAge').value);
+            const retirementAge = parseFloat(document.getElementById('retirementAge').value);
+            const lifeExpectancy = parseFloat(document.getElementById('lifeExpectancy').value);
+            let corpus = parseFloat(document.getElementById('currentCorpus').value);
+            
+            // Get expenses based on mode
+            let baseMonthlyExpenses;
+            let phaseExpenses = null;
+            
+            if (retirementPhasesMode) {
+                phaseExpenses = {
+                    phase1: parseFloat(document.getElementById('phase1Expense').value),
+                    phase2: parseFloat(document.getElementById('phase2Expense').value),
+                    phase3: parseFloat(document.getElementById('phase3Expense').value)
+                };
+                baseMonthlyExpenses = phaseExpenses.phase1; // Start with phase 1
+            } else {
+                baseMonthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value);
+            }
+            
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
+            
+            let portfolioConfig = null;
+            let annualReturn;
+            let taxRate;
+
+            if (advancedMode) {
+                portfolioConfig = getPortfolioConfig();
+                annualReturn = calculateWeightedReturn(portfolioConfig);
+                taxRate = calculateWeightedTaxRate(portfolioConfig);
+            } else {
+                annualReturn = parseFloat(document.getElementById('annualReturn').value) / 100;
+                taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+            }
+
+            const monthlyInflation = Math.pow(1 + inflationRate, 1/12) - 1;
+
+            const monthsToRetirement = (retirementAge - currentAge) * 12;
+            const monthsInRetirement = (lifeExpectancy - retirementAge) * 12;
+            const totalMonths = monthsToRetirement + monthsInRetirement;
+
+            // Helper function to get base expense for current age
+            function getBaseExpenseForAge(age) {
+                if (!retirementPhasesMode || !phaseExpenses) {
+                    return baseMonthlyExpenses;
+                }
+                
+                if (age <= phaseBoundaries.phase1End) {
+                    return phaseExpenses.phase1;
+                } else if (age <= phaseBoundaries.phase2End) {
+                    return phaseExpenses.phase2;
+                } else {
+                    return phaseExpenses.phase3;
+                }
+            }
+
+            let monthlyData = [];
+            let assetData = advancedMode ? initializeAssetTracking(corpus, portfolioConfig) : null;
+            let currentMonthlyExpense = baseMonthlyExpenses;
+            let totalWithdrawals = 0;
+            let totalTaxes = 0;
+            let ruinAge = null;
+
+            let totalRentalIncome = 0;
+            
+            for (let month = 0; month < totalMonths; month++) {
+                const currentAgeAtMonth = currentAge + (month / 12);
+                const isRetired = currentAgeAtMonth >= retirementAge;
+                const isYearEnd = month > 0 && month % 12 === 0;
+
+                let withdrawal = 0;
+                let tax = 0;
+                let rentalIncome = 0;
+                let liquidCorpus = corpus;
+                let netExpense = 0;
+
+                // Add rental income to corpus BEFORE retirement withdrawals
+                if (advancedMode && assetData) {
+                    rentalIncome = calculateMonthlyRentalIncome(assetData);
+                    if (rentalIncome > 0) {
+                        // Add rental income to rentalSurplus asset category
+                        assetData.liquid.rentalSurplus += rentalIncome;
+                        totalRentalIncome += rentalIncome;
+                    }
+                    liquidCorpus = calculateLiquidCorpus(assetData);
+                } else {
+                    liquidCorpus = corpus;
+                }
+
+                if (isRetired) {
+                    // Get base expense for current age/phase
+                    const baseExpense = getBaseExpenseForAge(currentAgeAtMonth);
+                    
+                    // Apply inflation from retirement age
+                    const yearsFromRetirement = currentAgeAtMonth - retirementAge;
+                    const inflationMultiplier = Math.pow(1 + inflationRate, yearsFromRetirement);
+                    netExpense = baseExpense * inflationMultiplier;
+                    
+                    // Withdraw for expenses (with taxes) from overall corpus
+                    if (netExpense > 0 && liquidCorpus > 0) {
+                        const grossWithdrawal = netExpense / (1 - taxRate);
+                        tax = grossWithdrawal * taxRate;
+                        withdrawal = grossWithdrawal;
+
+                        if (advancedMode && assetData) {
+                            // Withdraw proportionally from all liquid assets (including rentalSurplus)
+                            withdrawProportionally(assetData, grossWithdrawal);
+                            liquidCorpus = calculateLiquidCorpus(assetData);
+                        } else {
+                            corpus -= grossWithdrawal;
+                        }
+
+                        totalWithdrawals += netExpense;
+                        totalTaxes += tax;
+                    }
+                }
+
+                // Apply returns
+                if (advancedMode && assetData) {
+                    applyAssetReturns(assetData, portfolioConfig);
+                    corpus = calculateTotalCorpus(assetData);
+                    liquidCorpus = calculateLiquidCorpus(assetData);
+                    
+                    if (isYearEnd) {
+                        rebalancePortfolio(assetData, portfolioConfig);
+                    }
+                } else if (corpus > 0) {
+                    const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
+                    corpus *= (1 + monthlyReturn);
+                }
+                
+                // Check for liquid corpus depletion
+                if (advancedMode && assetData) {
+                    // Only mark as depleted if liquid corpus is gone AND rental income doesn't cover expenses
+                    if (liquidCorpus <= 0 && isRetired && ruinAge === null && rentalIncome < netExpense) {
+                        ruinAge = currentAgeAtMonth;
+                    }
+                } else {
+                    if (corpus <= 0 && isRetired && ruinAge === null) {
+                        ruinAge = currentAgeAtMonth;
+                        corpus = 0;
+                    }
+                }
+
+                // Store actual expense for this month
+                const actualExpense = isRetired ? (getBaseExpenseForAge(currentAgeAtMonth) * Math.pow(1 + inflationRate, currentAgeAtMonth - retirementAge)) : 0;
+                
+                const monthData = {
+                    month: month,
+                    age: currentAgeAtMonth,
+                    corpus: Math.max(0, corpus),
+                    liquidCorpus: advancedMode ? Math.max(0, liquidCorpus) : Math.max(0, corpus),
+                    withdrawal: withdrawal,
+                    tax: tax,
+                    expense: actualExpense,
+                    rentalIncome: rentalIncome,
+                    isRetired: isRetired,
+                    phase: retirementPhasesMode && isRetired ? (currentAgeAtMonth <= phaseBoundaries.phase1End ? 1 : currentAgeAtMonth <= phaseBoundaries.phase2End ? 2 : 3) : null
+                };
+
+                if (advancedMode && assetData) {
+                    monthData.assetValues = {
+                        liquid: { ...assetData.liquid },
+                        realEstate: { ...assetData.realEstate }
+                    };
+                }
+
+                monthlyData.push(monthData);
+
+                // Stop simulation if liquid corpus depleted and rental income insufficient
+                if (advancedMode && assetData) {
+                    // Only stop if liquid assets are depleted AND rental income doesn't cover expenses
+                    if (liquidCorpus <= 0 && isRetired && rentalIncome < netExpense) {
+                        break;
+                    }
+                } else {
+                    if (corpus <= 0 && isRetired) {
+                        break;
+                    }
+                }
+            }
+
+            const yearlyData = aggregateToYearly(monthlyData);
+
+            let yearsAfterDeath = null;
+            let isIndefinite = false;
+            let suggestedWithdrawalToDeplete = null;
+            let suggestedWithdrawalStable = null;
+            let suggestedCorpusForExpenses = null;
+
+            const retirementYears = lifeExpectancy - retirementAge;
+            const retirementMonths = retirementYears * 12;
+            const initialCorpusAtRetirement = monthlyData.find(m => m.isRetired)?.corpus || corpus;
+            
+            const realReturn = annualReturn - inflationRate;
+            const monthlyRealReturn = Math.pow(1 + realReturn, 1/12) - 1;
+
+            if (retirementMonths > 0) {
+                const pvifaDeplete = (1 - Math.pow(1 + monthlyRealReturn, -retirementMonths)) / monthlyRealReturn;
+                
+                if (pvifaDeplete > 0) {
+                    const grossMonthlyExpense = monthlyExpenses / (1 - taxRate);
+                    suggestedCorpusForExpenses = grossMonthlyExpense * pvifaDeplete;
+                    
+                    if (initialCorpusAtRetirement > 0) {
+                        suggestedWithdrawalToDeplete = (initialCorpusAtRetirement / pvifaDeplete) * (1 - taxRate);
+                    }
+                }
+
+                if (Math.abs(monthlyRealReturn) > 0.0001 && initialCorpusAtRetirement > 0) {
+                    suggestedWithdrawalStable = initialCorpusAtRetirement * monthlyRealReturn * (1 - taxRate);
+                } else {
+                    suggestedWithdrawalStable = 0;
+                }
+            }
+
+            if (ruinAge === null && corpus > 0) {
+                const lastMonthExpense = currentMonthlyExpense;
+                let testCorpus = corpus;
+                let monthsAfterDeath = 0;
+                const maxMonthsToTest = 1200;
+
+                for (let i = 0; i < maxMonthsToTest; i++) {
+                    const netExpense = lastMonthExpense * Math.pow(1 + monthlyInflation, i);
+                    const grossWithdrawal = netExpense / (1 - taxRate);
+                    testCorpus -= grossWithdrawal;
+
+                    if (testCorpus <= 0) {
+                        yearsAfterDeath = (i / 12).toFixed(1);
+                        break;
+                    }
+
+                    if (advancedMode && assetData) {
+                        const testAssets = { ...assetData };
+                        applyAssetReturns(testAssets, portfolioConfig);
+                        testCorpus = calculateTotalCorpus(testAssets);
+                    } else {
+                        const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
+                        testCorpus *= (1 + monthlyReturn);
+                    }
+                }
+
+                if (monthsAfterDeath === 0) {
+                    isIndefinite = true;
+                }
+            }
+
+            // Determine sustainability based on liquid corpus in advanced mode
+            let finalLiquidCorpus = corpus;
+            if (advancedMode && assetData) {
+                finalLiquidCorpus = calculateLiquidCorpus(assetData);
+            }
+            
+            const isSustainable = ruinAge === null && (advancedMode ? finalLiquidCorpus > 0 : corpus > 0);
+
+            calculationResults = {
+                monthlyData: monthlyData,
+                yearlyData: yearlyData,
+                finalCorpus: corpus,
+                finalLiquidCorpus: finalLiquidCorpus,
+                totalWithdrawals: totalWithdrawals,
+                totalTaxes: totalTaxes,
+                totalRentalIncome: totalRentalIncome,
+                ruinAge: ruinAge,
+                isSustainable: isSustainable,
+                inflationRate: inflationRate,
+                currentAge: currentAge,
+                advancedMode: advancedMode,
+                portfolioConfig: portfolioConfig,
+                yearsAfterDeath: yearsAfterDeath,
+                isIndefinite: isIndefinite,
+                suggestedWithdrawalToDeplete: suggestedWithdrawalToDeplete,
+                suggestedWithdrawalStable: suggestedWithdrawalStable,
+                suggestedCorpusForExpenses: suggestedCorpusForExpenses,
+                retirementAge: retirementAge,
+                lifeExpectancy: lifeExpectancy,
+                monthlyExpenses: monthlyExpenses
+            };
+
+            updateUI();
+        }
+
+        function getPortfolioConfig() {
+            const realEstateAppreciation = parseFloat(document.getElementById('realEstateAppreciation').value) / 100;
+            const realEstateYield = parseFloat(document.getElementById('realEstateYield').value) / 100;
+
+            return {
+                fixedIncome: {
+                    allocation: parseFloat(document.getElementById('fixedIncomeAlloc').value) / 100,
+                    return: parseFloat(document.getElementById('fixedIncomeReturn').value) / 100,
+                    taxRate: parseFloat(document.getElementById('fixedIncomeTax').value) / 100
+                },
+                realEstate: {
+                    allocation: parseFloat(document.getElementById('realEstateAlloc').value) / 100,
+                    return: realEstateAppreciation + realEstateYield,
+                    taxRate: parseFloat(document.getElementById('realEstateTax').value) / 100
+                },
+                largeCap: {
+                    allocation: parseFloat(document.getElementById('largeCapAlloc').value) / 100,
+                    return: parseFloat(document.getElementById('largeCapReturn').value) / 100,
+                    taxRate: parseFloat(document.getElementById('largeCapTax').value) / 100
+                },
+                midCap: {
+                    allocation: parseFloat(document.getElementById('midCapAlloc').value) / 100,
+                    return: parseFloat(document.getElementById('midCapReturn').value) / 100,
+                    taxRate: parseFloat(document.getElementById('midCapTax').value) / 100
+                },
+                smallCap: {
+                    allocation: parseFloat(document.getElementById('smallCapAlloc').value) / 100,
+                    return: parseFloat(document.getElementById('smallCapReturn').value) / 100,
+                    taxRate: parseFloat(document.getElementById('smallCapTax').value) / 100
+                }
+            };
+        }
+
+        function calculateWeightedReturn(config) {
+            let weightedReturn = 0;
+            for (const asset in config) {
+                weightedReturn += config[asset].allocation * config[asset].return;
+            }
+            return weightedReturn;
+        }
+
+        function calculateWeightedTaxRate(config) {
+            let weightedTax = 0;
+            for (const asset in config) {
+                weightedTax += config[asset].allocation * config[asset].taxRate;
+            }
+            return weightedTax;
+        }
+
+        function initializeAssetTracking(totalCorpus, config) {
+            const assets = {
+                liquid: {},
+                realEstate: {
+                    propertyValue: 0,
+                    rentalYield: 0
+                }
+            };
+            
+            for (const asset in config) {
+                if (asset === 'realEstate') {
+                    assets.realEstate.propertyValue = totalCorpus * config[asset].allocation;
+                    assets.realEstate.rentalYield = config[asset].return - (parseFloat(document.getElementById('realEstateAppreciation').value) / 100);
+                } else {
+                    assets.liquid[asset] = totalCorpus * config[asset].allocation;
+                }
+            }
+            
+            // Add rental surplus category (starts at 0, grows only from surplus rental income)
+            assets.liquid.rentalSurplus = 0;
+            
+            return assets;
+        }
+
+        function withdrawProportionally(assets, amount) {
+            const liquidTotal = calculateLiquidCorpus(assets);
+            if (liquidTotal === 0) return;
+
+            for (const asset in assets.liquid) {
+                const proportion = assets.liquid[asset] / liquidTotal;
+                assets.liquid[asset] -= amount * proportion;
+                assets.liquid[asset] = Math.max(0, assets.liquid[asset]);
+            }
+        }
+
+        function applyAssetReturns(assets, config) {
+            // Apply returns to liquid assets (except rentalSurplus which has 0% growth)
+            for (const asset in assets.liquid) {
+                if (asset === 'rentalSurplus') {
+                    // Rental surplus has 0% growth - only grows from new surplus income
+                    continue;
+                }
+                if (assets.liquid[asset] > 0 && config[asset]) {
+                    const monthlyReturn = Math.pow(1 + config[asset].return, 1/12) - 1;
+                    assets.liquid[asset] *= (1 + monthlyReturn);
+                }
+            }
+            
+            // Apply appreciation to real estate property value
+            if (assets.realEstate.propertyValue > 0) {
+                const realEstateAppreciation = parseFloat(document.getElementById('realEstateAppreciation').value) / 100;
+                const monthlyAppreciation = Math.pow(1 + realEstateAppreciation, 1/12) - 1;
+                assets.realEstate.propertyValue *= (1 + monthlyAppreciation);
+            }
+        }
+
+        function calculateLiquidCorpus(assets) {
+            let total = 0;
+            for (const asset in assets.liquid) {
+                total += assets.liquid[asset];
+            }
+            return total;
+        }
+        
+        function calculateTotalCorpus(assets) {
+            let total = calculateLiquidCorpus(assets);
+            total += assets.realEstate.propertyValue;
+            return total;
+        }
+        
+        function calculateMonthlyRentalIncome(assets) {
+            if (assets.realEstate.propertyValue > 0) {
+                return assets.realEstate.propertyValue * (assets.realEstate.rentalYield / 12);
+            }
+            return 0;
+        }
+
+        function rebalancePortfolio(assets, config) {
+            // Only rebalance liquid assets, real estate and rentalSurplus stay separate
+            const liquidTotal = calculateLiquidCorpus(assets);
+            
+            // Preserve rentalSurplus before rebalancing
+            const rentalSurplusAmount = assets.liquid.rentalSurplus || 0;
+            
+            // Calculate total allocation for liquid assets (excluding real estate)
+            let liquidAllocation = 0;
+            for (const asset in config) {
+                if (asset !== 'realEstate') {
+                    liquidAllocation += config[asset].allocation;
+                }
+            }
+            
+            // Calculate rebalanceable amount (total liquid - rental surplus)
+            const rebalanceableAmount = liquidTotal - rentalSurplusAmount;
+            
+            // Rebalance liquid assets proportionally (excluding rentalSurplus)
+            if (liquidAllocation > 0 && rebalanceableAmount > 0) {
+                for (const asset in assets.liquid) {
+                    if (asset === 'rentalSurplus') {
+                        // Keep rentalSurplus unchanged
+                        continue;
+                    }
+                    if (config[asset]) {
+                        assets.liquid[asset] = rebalanceableAmount * (config[asset].allocation / liquidAllocation);
+                    }
+                }
+            }
+            
+            // Restore rentalSurplus
+            assets.liquid.rentalSurplus = rentalSurplusAmount;
+        }
+
+        function aggregateToYearly(monthlyData) {
+            const yearlyData = [];
+            let currentYear = null;
+            let yearData = null;
+
+            monthlyData.forEach((month, index) => {
+                const year = Math.floor(month.age);
+
+                if (year !== currentYear) {
+                    if (yearData) {
+                        yearlyData.push(yearData);
+                    }
+
+                    yearData = {
+                        age: year,
+                        startBalance: month.corpus,
+                        startLiquidBalance: month.liquidCorpus !== undefined ? month.liquidCorpus : month.corpus,
+                        liquidBalance: month.liquidCorpus !== undefined ? month.liquidCorpus : month.corpus,
+                        withdrawals: 0,
+                        taxes: 0,
+                        rentalIncome: 0,
+                        endBalance: month.corpus,
+                        expense: month.expense,
+                        yearsSinceStart: year - Math.floor(monthlyData[0].age)
+                    };
+
+                    if (month.assetValues) {
+                        yearData.assetValues = {
+                            liquid: { ...month.assetValues.liquid },
+                            realEstate: { ...month.assetValues.realEstate }
+                        };
+                    }
+
+                    currentYear = year;
+                }
+
+                yearData.withdrawals += month.withdrawal;
+                yearData.taxes += month.tax;
+                yearData.rentalIncome += month.rentalIncome || 0;
+                yearData.endBalance = month.corpus;
+                yearData.liquidBalance = month.liquidCorpus !== undefined ? month.liquidCorpus : month.corpus;
+
+                if (month.assetValues) {
+                    yearData.assetValues = {
+                        liquid: { ...month.assetValues.liquid },
+                        realEstate: { ...month.assetValues.realEstate }
+                    };
+                }
+            });
+
+            if (yearData) {
+                yearlyData.push(yearData);
+            }
+
+            // Calculate returns for each year
+            for (let i = 0; i < yearlyData.length; i++) {
+                if (i === 0) {
+                    yearlyData[i].returns = 0;
+                    yearlyData[i].realReturns = 0;
+                } else {
+                    const startBalance = yearlyData[i].startBalance;
+                    const endBalance = yearlyData[i].endBalance;
+                    const withdrawals = yearlyData[i].withdrawals;
+                    
+                    // Calculate nominal returns (growth + withdrawals - starting balance)
+                    const returns = (endBalance + withdrawals) - startBalance;
+                    yearlyData[i].returns = returns;
+                    
+                    // Calculate real returns (adjusted for inflation)
+                    const inflationRate = calculationResults ? calculationResults.inflationRate : 0;
+                    const inflationAdjustment = startBalance * inflationRate;
+                    yearlyData[i].realReturns = returns - inflationAdjustment;
+                }
+            }
+
+            return yearlyData;
+        }
+
+        function updateUI() {
+            updateSummary();
+            updateSuggestions();
+            updateTable();
+            updateCharts();
+        }
+
+        function updateSummary() {
+            const { finalCorpus, finalLiquidCorpus, totalWithdrawals, totalTaxes, totalRentalIncome, ruinAge, isSustainable, 
+                    yearsAfterDeath, isIndefinite, lifeExpectancy, advancedMode } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            let depletionInfo = '';
+            if (ruinAge) {
+                const warningText = advancedMode ? 
+                    `<small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px; color: #fff;">⚠️ Liquid assets depleted. Rebalance portfolio!</small>` : '';
+                depletionInfo = `
+                    <div class="summary-item warning">
+                        <h3>${advancedMode ? 'Liquid Corpus Depletion Age' : 'Corpus Depletion Age'}</h3>
+                        <p>${ruinAge.toFixed(1)}</p>
+                        ${warningText}
+                    </div>
+                `;
+            } else if (isIndefinite) {
+                depletionInfo = `
+                    <div class="summary-item success">
+                        <h3>Corpus Longevity</h3>
+                        <p>♾️ Indefinite</p>
+                    </div>
+                `;
+            } else if (yearsAfterDeath) {
+                const totalYears = parseFloat(yearsAfterDeath);
+                const depletionAge = lifeExpectancy + totalYears;
+                depletionInfo = `
+                    <div class="summary-item success">
+                        <h3>Corpus Lasts Until</h3>
+                        <p>Age ${depletionAge.toFixed(1)}<br><small style="font-size: 0.8rem; opacity: 0.8;">(${yearsAfterDeath} yrs after death)</small></p>
+                    </div>
+                `;
+            }
+
+            let rentalIncomeSection = '';
+            if (advancedMode && totalRentalIncome > 0) {
+                rentalIncomeSection = `
+                    <div class="summary-item" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                        <h3>Total Rental Income</h3>
+                        <p>${symbol}${formatCurrency(totalRentalIncome)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
+                            Passive cash flow
+                        </small>
+                    </div>
+                `;
+            }
+
+            // Show liquid corpus separately in advanced mode
+            let corpusSection = '';
+            if (advancedMode) {
+                const realEstateValue = finalCorpus - finalLiquidCorpus;
+                corpusSection = `
+                    <div class="summary-item">
+                        <h3>Liquid Assets (Final)</h3>
+                        <p>${symbol}${formatCurrency(finalLiquidCorpus)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.7; display: block; margin-top: 5px;">
+                            Withdrawable
+                        </small>
+                    </div>
+                    <div class="summary-item" style="background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);">
+                        <h3>Real Estate (Final)</h3>
+                        <p>${symbol}${formatCurrency(realEstateValue)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
+                            Illiquid (preserved)
+                        </small>
+                    </div>
+                    <div class="summary-item">
+                        <h3>Total Net Worth</h3>
+                        <p>${symbol}${formatCurrency(finalCorpus)}</p>
+                    </div>
+                `;
+            } else {
+                corpusSection = `
+                    <div class="summary-item">
+                        <h3>Final Corpus</h3>
+                        <p>${symbol}${formatCurrency(finalCorpus)}</p>
+                    </div>
+                `;
+            }
+
+            const summaryHTML = `
+                <div class="summary-item ${isSustainable ? 'success' : 'warning'}">
+                    <h3>Plan Status</h3>
+                    <p>${isSustainable ? '✓ Sustainable' : '✗ Not Sustainable'}</p>
+                </div>
+                ${depletionInfo}
+                ${corpusSection}
+                ${rentalIncomeSection}
+                <div class="summary-item">
+                    <h3>Total Withdrawals</h3>
+                    <p>${symbol}${formatCurrency(totalWithdrawals)}</p>
+                </div>
+                <div class="summary-item">
+                    <h3>Total Taxes Paid</h3>
+                    <p>${symbol}${formatCurrency(totalTaxes)}</p>
+                </div>
+            `;
+
+            document.getElementById('summaryGrid').innerHTML = summaryHTML;
+        }
+
+        function updateSuggestions() {
+            const { suggestedWithdrawalToDeplete, suggestedWithdrawalStable, 
+                    suggestedCorpusForExpenses, monthlyExpenses, isSustainable } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            let suggestionsHTML = '';
+
+            if (suggestedCorpusForExpenses !== null && suggestedCorpusForExpenses > 0) {
+                suggestionsHTML += `
+                    <div class="summary-item" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);">
+                        <h3>Required Corpus</h3>
+                        <p>${symbol}${formatCurrency(suggestedCorpusForExpenses)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
+                            For ${symbol}${formatCurrency(monthlyExpenses)}/month till death
+                        </small>
+                    </div>
+                `;
+            }
+
+            if (suggestedWithdrawalToDeplete !== null && suggestedWithdrawalToDeplete > 0) {
+                const depleteLabel = isSustainable ? 'Max Withdrawal' : 'To Last Till Death';
+                
+                suggestionsHTML += `
+                    <div class="summary-item" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                        <h3>${depleteLabel}</h3>
+                        <p>${symbol}${formatCurrency(suggestedWithdrawalToDeplete)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
+                            per month (depletes at death)
+                        </small>
+                    </div>
+                `;
+            }
+            
+            if (suggestedWithdrawalStable !== null && suggestedWithdrawalStable > 0) {
+                const stableLabel = isSustainable ? 'Perpetual Withdrawal' : 'For Stable Corpus';
+                
+                suggestionsHTML += `
+                    <div class="summary-item" style="background: linear-gradient(135deg, #16a085 0%, #138f77 100%);">
+                        <h3>${stableLabel}</h3>
+                        <p>${symbol}${formatCurrency(suggestedWithdrawalStable)}</p>
+                        <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
+                            per month (maintains real value)
+                        </small>
+                    </div>
+                `;
+            }
+
+            document.getElementById('suggestionsGrid').innerHTML = suggestionsHTML;
+        }
+
+        function updateTable() {
+            const data = currentView === 'yearly' ? calculationResults.yearlyData : calculationResults.monthlyData;
+            const tbody = document.getElementById('tableBody');
+            const thead = document.getElementById('tableHeader');
+            const symbol = currencySymbols[selectedCurrency];
+            const { advancedMode } = calculationResults;
+            
+            // Check if we have real estate data
+            const hasRealEstate = advancedMode && data.some(row => {
+                return row.assetValues && row.assetValues.realEstate && row.assetValues.realEstate.propertyValue > 0;
+            });
+            
+            // Update table header based on mode
+            if (hasRealEstate) {
+                thead.innerHTML = `
+                    <tr>
+                        <th>Age</th>
+                        <th>Liquid Corpus</th>
+                        <th>Real Estate</th>
+                        <th>Total Corpus</th>
+                        <th>Withdrawals</th>
+                        <th>Taxes Paid</th>
+                    </tr>
+                `;
+            } else {
+                thead.innerHTML = `
+                    <tr>
+                        <th>Age</th>
+                        <th>Start Balance</th>
+                        <th>Withdrawals</th>
+                        <th>Taxes Paid</th>
+                        <th>End Balance</th>
+                    </tr>
+                `;
+            }
+            
+            let html = '';
+            const displayData = currentView === 'yearly' ? data : data.filter((_, i) => i % 3 === 0);
+
+            displayData.forEach(row => {
+                const age = currentView === 'yearly' ? row.age : row.age.toFixed(1);
+                const withdrawals = currentView === 'yearly' ? row.withdrawals : row.withdrawal;
+                const taxes = currentView === 'yearly' ? row.taxes : row.tax;
+
+                if (hasRealEstate) {
+                    // Get total corpus
+                    const totalCorpus = currentView === 'yearly' ? (row.endBalance || 0) : (row.corpus || 0);
+                    
+                    // Get real estate value from assetValues
+                    let realEstateValue = 0;
+                    if (row.assetValues && row.assetValues.realEstate) {
+                        realEstateValue = row.assetValues.realEstate.propertyValue || 0;
+                    }
+                    
+                    // Calculate liquid corpus as total minus real estate
+                    const liquidBalance = totalCorpus - realEstateValue;
+                    
+                    html += `
+                        <tr>
+                            <td>${age}</td>
+                            <td>${symbol}${formatCurrency(liquidBalance)}</td>
+                            <td>${symbol}${formatCurrency(realEstateValue)}</td>
+                            <td>${symbol}${formatCurrency(totalCorpus)}</td>
+                            <td>${symbol}${formatCurrency(withdrawals)}</td>
+                            <td>${symbol}${formatCurrency(taxes)}</td>
+                        </tr>
+                    `;
+                } else {
+                    const startBalance = currentView === 'yearly' ? row.startBalance : row.corpus;
+                    const endBalance = currentView === 'yearly' ? row.endBalance : row.corpus;
+                    
+                    html += `
+                        <tr>
+                            <td>${age}</td>
+                            <td>${symbol}${formatCurrency(startBalance)}</td>
+                            <td>${symbol}${formatCurrency(withdrawals)}</td>
+                            <td>${symbol}${formatCurrency(taxes)}</td>
+                            <td>${symbol}${formatCurrency(endBalance)}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function updateCharts() {
+            const yearlyData = calculationResults.yearlyData;
+            const { inflationRate, currentAge } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            const labels = yearlyData.map(d => d.age);
+            const corpusData = yearlyData.map(d => d.endBalance);
+            const withdrawalData = yearlyData.map(d => d.withdrawals);
+            const taxData = yearlyData.map(d => d.taxes);
+            const expenseData = yearlyData.map(d => d.expense * 12);
+            
+            const realValueData = yearlyData.map(d => {
+                const yearsFromNow = d.yearsSinceStart;
+                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
+                return d.endBalance / deflator;
+            });
+
+            const returnsData = yearlyData.map(d => d.returns || 0);
+            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
+
+            if (customChart) customChart.destroy();
+            if (corpusChart) corpusChart.destroy();
+            if (withdrawalChart) withdrawalChart.destroy();
+            if (expenseChart) expenseChart.destroy();
+            if (realValueChart) realValueChart.destroy();
+            if (returnsChart) returnsChart.destroy();
+
+            // Update custom chart first
+            updateCustomChart();
+
+            const ctx1 = document.getElementById('corpusChart').getContext('2d');
+            corpusChart = new Chart(ctx1, {
+                type: chartTypes.corpus,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Corpus Value',
+                        data: corpusData,
+                        borderColor: '#667eea',
+                        backgroundColor: chartTypes.corpus === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                        borderWidth: chartTypes.corpus === 'line' ? 3 : 1,
+                        fill: chartTypes.corpus === 'line',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Corpus: ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('withdrawalChart').getContext('2d');
+            withdrawalChart = new Chart(ctx2, {
+                type: chartTypes.withdrawal,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Annual Withdrawals',
+                        data: withdrawalData,
+                        borderColor: '#27ae60',
+                        backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
+                        borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
+                        fill: chartTypes.withdrawal === 'line',
+                        tension: 0.4
+                    }, {
+                        label: 'Annual Taxes',
+                        data: taxData,
+                        borderColor: '#e74c3c',
+                        backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
+                        borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
+                        fill: chartTypes.withdrawal === 'line',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctx3 = document.getElementById('expenseChart').getContext('2d');
+            expenseChart = new Chart(ctx3, {
+                type: chartTypes.expense,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Annual Expenses',
+                        data: expenseData,
+                        borderColor: '#f39c12',
+                        backgroundColor: chartTypes.expense === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
+                        borderWidth: chartTypes.expense === 'line' ? 3 : 1,
+                        fill: chartTypes.expense === 'line',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Expenses: ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctx4 = document.getElementById('realValueChart').getContext('2d');
+            realValueChart = new Chart(ctx4, {
+                type: chartTypes.realValue,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nominal Corpus Value',
+                        data: corpusData,
+                        borderColor: '#667eea',
+                        backgroundColor: chartTypes.realValue === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                        borderWidth: chartTypes.realValue === 'line' ? 2 : 1,
+                        fill: chartTypes.realValue === 'line' ? false : true,
+                        tension: 0.4,
+                        borderDash: chartTypes.realValue === 'line' ? [5, 5] : []
+                    }, {
+                        label: 'Real Value (Today\'s Money)',
+                        data: realValueData,
+                        borderColor: '#e74c3c',
+                        backgroundColor: chartTypes.realValue === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
+                        borderWidth: chartTypes.realValue === 'line' ? 3 : 1,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctx5 = document.getElementById('returnsChart').getContext('2d');
+            returnsChart = new Chart(ctx5, {
+                type: chartTypes.returns,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nominal Returns',
+                        data: returnsData,
+                        backgroundColor: chartTypes.returns === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: chartTypes.returns === 'line' ? 3 : 1,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: chartTypes.returns === 'line' ? 4 : 0,
+                        pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
+                    }, {
+                        label: 'Inflation-Adjusted Returns',
+                        data: realReturnsData,
+                        backgroundColor: chartTypes.returns === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
+                        borderColor: '#2ecc71',
+                        borderWidth: chartTypes.returns === 'line' ? 3 : 1,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: chartTypes.returns === 'line' ? 4 : 0,
+                        pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const sign = value >= 0 ? '+' : '';
+                                    return context.dataset.label + ': ' + sign + symbol + formatCurrency(Math.abs(value));
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    const sign = value >= 0 ? '+' : '-';
+                                    return sign + symbol + formatCurrencyShort(Math.abs(value));
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Returns'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (calculationResults.advancedMode && calculationResults.portfolioConfig) {
+                updatePortfolioCharts();
+            }
+        }
+
+        function updatePortfolioCharts() {
+            const { portfolioConfig, yearlyData } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+
+            if (allocationPieChart) allocationPieChart.destroy();
+            if (assetContributionChart) assetContributionChart.destroy();
+
+            const assetNames = {
+                fixedIncome: 'Fixed Income',
+                realEstate: 'Real Estate',
+                largeCap: 'Large Cap',
+                midCap: 'Mid Cap',
+                smallCap: 'Small Cap',
+                rentalSurplus: 'Rental Income'
+            };
+
+            const assetColors = {
+                fixedIncome: '#3498db',
+                realEstate: '#e67e22',
+                largeCap: '#2ecc71',
+                midCap: '#f39c12',
+                smallCap: '#9b59b6',
+                rentalSurplus: '#16a085'
+            };
+
+            const allocations = [];
+            const labels = [];
+            const colors = [];
+
+            for (const asset in portfolioConfig) {
+                if (portfolioConfig[asset].allocation > 0) {
+                    allocations.push((portfolioConfig[asset].allocation * 100).toFixed(1));
+                    labels.push(assetNames[asset]);
+                    colors.push(assetColors[asset]);
+                }
+            }
+
+            const ctxPie = document.getElementById('allocationPieChart').getContext('2d');
+            allocationPieChart = new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: allocations,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ageLabels = yearlyData.map(d => d.age);
+            const datasets = [];
+
+            // Add liquid assets (including rentalSurplus)
+            const liquidAssets = ['fixedIncome', 'largeCap', 'midCap', 'smallCap', 'rentalSurplus'];
+            for (const asset of liquidAssets) {
+                const assetData = yearlyData.map(d => {
+                    if (!d.assetValues || !d.assetValues.liquid) return 0;
+                    return d.assetValues.liquid[asset] || 0;
+                });
+                
+                // Only add if there's any data
+                const hasData = assetData.some(val => val > 0);
+                if (hasData) {
+                    datasets.push({
+                        label: assetNames[asset],
+                        data: assetData,
+                        borderColor: assetColors[asset],
+                        backgroundColor: assetColors[asset] + '40',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    });
+                }
+            }
+
+            // Add real estate
+            const realEstateData = yearlyData.map(d => {
+                if (!d.assetValues || !d.assetValues.realEstate) return 0;
+                return d.assetValues.realEstate.propertyValue || 0;
+            });
+            
+            const hasRealEstate = realEstateData.some(val => val > 0);
+            if (hasRealEstate) {
+                datasets.push({
+                    label: assetNames.realEstate,
+                    data: realEstateData,
+                    borderColor: assetColors.realEstate,
+                    backgroundColor: assetColors.realEstate + '40',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                });
+            }
+
+            const ctxContribution = document.getElementById('assetContributionChart').getContext('2d');
+            assetContributionChart = new Chart(ctxContribution, {
+                type: 'line',
+                data: {
+                    labels: ageLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            stacked: false,
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return symbol + formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function formatCurrencyShort(value) {
+            if (selectedCurrency === 'INR') {
+                if (value >= 10000000) {
+                    return (value / 10000000).toFixed(2) + ' Cr';
+                } else if (value >= 100000) {
+                    return (value / 100000).toFixed(2) + ' L';
+                } else if (value >= 1000) {
+                    return (value / 1000).toFixed(1) + 'k';
+                } else {
+                    return value.toFixed(0);
+                }
+            } else {
+                if (value >= 1000000) {
+                    return (value / 1000000).toFixed(2) + 'M';
+                } else if (value >= 1000) {
+                    return (value / 1000).toFixed(0) + 'k';
+                } else {
+                    return value.toFixed(0);
+                }
+            }
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateTable();
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculateRetirement);
+        });
+
+        document.querySelectorAll('#advancedPortfolio input').forEach(input => {
+            input.addEventListener('input', calculateRetirement);
+        });
+
+        // Update phase slider when retirement age or life expectancy changes
+        document.getElementById('retirementAge').addEventListener('input', function() {
+            if (retirementPhasesMode) {
+                initializePhaseSlider();
+            }
+        });
+
+        document.getElementById('lifeExpectancy').addEventListener('input', function() {
+            if (retirementPhasesMode) {
+                initializePhaseSlider();
+            }
+        });
+
+        // Add listeners for phase expense inputs
+        ['phase1Expense', 'phase2Expense', 'phase3Expense'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateRetirement);
+        });
+
+        calculateRetirement();
+    </script>
+</body>
+</html>
