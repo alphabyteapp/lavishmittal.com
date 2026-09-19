@@ -4,932 +4,857 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIRE Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        :root {
-            /* Modern Color Palette - Material Design 3 inspired */
-            --primary: #1a73e8;
-            --primary-light: #4285f4;
-            --primary-dark: #1557b0;
-            --secondary: #34a853;
-            --accent: #ea4335;
-            --warning: #fbbc04;
-            
-            /* Neutral Palette */
-            --surface: #f5f5f5;
-            --surface-variant: #e8eaed;
-            --surface-container: #dadce0;
-            --on-surface: #202124;
-            --on-surface-variant: #5f6368;
-            --outline: #c4c7c9;
-            --outline-variant: #dadce0;
-            
-            /* Shadows - Elevated surfaces */
-            --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-            --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
-            --shadow-lg: 0 2px 6px 2px rgba(60, 64, 67, 0.15), 0 8px 24px 4px rgba(60, 64, 67, 0.15);
-            --shadow-xl: 0 4px 16px 6px rgba(60, 64, 67, 0.15), 0 8px 36px 8px rgba(60, 64, 67, 0.15);
-            
-            /* Typography */
-            --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            
-            /* Spacing */
-            --spacing-xs: 4px;
-            --spacing-sm: 8px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --spacing-2xl: 48px;
-            
-            /* Border Radius */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --radius-full: 9999px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background: 
-                linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%),
-                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.03) 10px, rgba(255, 255, 255, 0.03) 20px);
-            background-attachment: fixed;
-            min-height: 100vh;
-            padding: var(--spacing-lg);
-            color: var(--on-surface);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr minmax(320px, 420px);
-            gap: var(--spacing-lg);
-            align-items: start;
-        }
-
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
-            min-width: 0;
-        }
-
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
-            min-width: 0;
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: var(--spacing-2xl);
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            font-family: var(--font-display);
-            letter-spacing: -0.02em;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .card {
-            background: linear-gradient(135deg, #d1d3d6 0%, #c0c3c7 100%) !important;
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-            margin-bottom: 0;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 12px 48px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .card h2 {
-            color: var(--on-surface);
-            margin-bottom: var(--spacing-lg);
-            font-size: 1.5rem;
-            font-weight: 600;
-            font-family: var(--font-display);
-            letter-spacing: -0.01em;
-            border-bottom: none;
-            padding-bottom: 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .card h2::before {
-            content: '';
-            width: 5px;
-            height: 28px;
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-            border-radius: var(--radius-full);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
-        }
-
-        .input-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .input-group label {
-            font-weight: 500;
-            color: var(--on-surface);
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            letter-spacing: 0.01em;
-        }
-
-        .tooltip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 18px;
-            height: 18px;
-            background: var(--surface-container);
-            color: var(--on-surface-variant);
-            border-radius: var(--radius-full);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: help;
-            position: relative;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--outline);
-        }
-
-        .tooltip:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        .tooltip:hover::after {
-            content: attr(data-tip);
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--on-surface);
-            color: var(--surface);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-sm);
-            white-space: nowrap;
-            font-size: 0.75rem;
-            font-weight: 400;
-            z-index: 1000;
-            box-shadow: var(--shadow-lg);
-            animation: tooltipFadeIn 0.2s ease-out;
-        }
-
-        @keyframes tooltipFadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(4px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        .input-group input,
-        .input-group select {
-            padding: 14px 16px;
-            border: 1.5px solid var(--outline);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-family: var(--font-body);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            color: var(--on-surface);
-        }
-
-        .input-group input:hover,
-        .input-group select:hover {
-            border-color: var(--on-surface-variant);
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.08);
-        }
-
-        .input-group input.error,
-        .input-group select.error {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(234, 67, 53, 0.08);
-        }
-
-        .currency-selector {
-            grid-column: 1 / -1;
-            max-width: 300px;
-        }
-
-        .toggle-switch-container {
-            grid-column: 1 / -1;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            padding: var(--spacing-md) var(--spacing-lg);
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-            border-radius: var(--radius-md);
-            border: 2px solid #c2d9ff;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 10px;
-        }
-
-        .toggle-switch-container:hover {
-            border-color: #a8c7fa;
-            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
-        }
-
-        .toggle-switch {
-            width: 52px;
-            height: 32px;
-            background: var(--outline);
-            border-radius: var(--radius-full);
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .toggle-switch:hover {
-            background: var(--on-surface-variant);
-        }
-
-        .toggle-switch.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-        }
-
-        .toggle-switch-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .toggle-switch.active .toggle-switch-slider {
-            transform: translateX(30px);
-        }
-
-        .toggle-switch-container label {
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-            cursor: pointer;
-        }
-
-        .advanced-portfolio-section {
-            display: none;
-            grid-column: 1 / -1;
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid #667eea;
-        }
-
-        .advanced-portfolio-section.active {
-            display: block;
-        }
-
-        .asset-class-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .asset-class-card {
-            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
-        }
-
-        .asset-class-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-        }
-
-        .asset-class-card h4 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .slider-container {
-            margin-bottom: 15px;
-        }
-
-        .slider-container label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            color: #555;
-        }
-
-        .slider-value {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 0.9rem;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            border-radius: var(--radius-full);
-            background: var(--outline-variant);
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: grab;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-            box-shadow: 0 3px 8px rgba(26, 115, 232, 0.4);
-        }
-
-        input[type="range"]::-webkit-slider-thumb:active {
-            cursor: grabbing;
-            transform: scale(1.05);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: grab;
-            border: none;
-            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            transform: scale(1.15);
-        }
-
-        .allocation-summary {
-            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .allocation-total {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .allocation-total.valid {
-            color: #27ae60;
-        }
-
-        .allocation-total.invalid {
-            color: #e74c3c;
-        }
-
-        .allocation-message {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .simple-return-group {
-            display: block;
-        }
-
-        .simple-tax-group {
-            display: block;
-        }
-
-        .simple-return-group.hidden {
-            display: none;
-        }
-
-        .real-estate-special {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .real-estate-special .input-group {
-            margin: 0;
-        }
-
-        .real-estate-special input {
-            padding: 8px;
-            font-size: 0.9rem;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .summary-grid {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .summary-item {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-radius: var(--radius-md);
-            color: white;
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .summary-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .summary-item.warning {
-            background: linear-gradient(135deg, var(--accent) 0%, #c5221f 100%);
-        }
-
-        .summary-item.success {
-            background: linear-gradient(135deg, var(--secondary) 0%, #1e8e3e 100%);
-        }
-
-        .summary-item h3 {
-            font-size: 0.7rem;
-            font-weight: 500;
-            margin-bottom: var(--spacing-xs);
-            opacity: 0.95;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-        }
-
-        .summary-item p {
-            font-size: 1.5rem;
-            font-weight: 700;
-            font-family: var(--font-display);
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        th {
-            background: var(--surface-variant);
-            color: var(--on-surface);
-            padding: 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.875rem;
-            letter-spacing: 0.01em;
-            border-bottom: 2px solid var(--outline);
-        }
-
-        th:first-child {
-            border-top-left-radius: var(--radius-md);
-        }
-
-        th:last-child {
-            border-top-right-radius: var(--radius-md);
-        }
-
-        td {
-            padding: 16px;
-            border-bottom: 1px solid var(--outline-variant);
-            color: var(--on-surface);
-            font-size: 0.9rem;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover {
-            background: var(--surface-variant);
-        }
-
-        .chart-container {
-            height: 450px;
-            position: relative;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .chart-type-toggle {
-            display: flex;
-            gap: 4px;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-            padding: 4px;
-            border-radius: var(--radius-full);
-            border: 2px solid #c2d9ff;
-        }
-
-        .chart-type-btn {
-            padding: 8px 16px;
-            border: none;
-            background: transparent;
-            color: #5f6b8a;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: var(--font-body);
-        }
-
-        .chart-type-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .chart-type-btn:hover:not(.active) {
-            color: var(--on-surface);
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .retirement-phases-section {
-            display: none;
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #f0fff4 0%, #e6f9ed 100%);
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-md);
-            border: 3px solid #34a853;
-            margin-top: 15px;
-            box-shadow: 0 4px 16px rgba(52, 168, 83, 0.15);
-        }
-
-        .retirement-phases-section.active {
-            display: block;
-        }
-
-        .phase-inputs-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .phase-input-card {
-            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-md);
-            border: 3px solid #ddd;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .phase-input-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-        }
-
-        .phase-input-card h4 {
-            margin: 0 0 10px 0;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .phase-input-card.phase-1 {
-            border-color: #3498db;
-            background: linear-gradient(135deg, #f5f9fc 0%, #e8f4fb 100%);
-        }
-
-        .phase-input-card.phase-1:hover {
-            border-color: #2980b9;
-            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.25);
-        }
-
-        .phase-input-card.phase-2 {
-            border-color: #f39c12;
-            background: linear-gradient(135deg, #fcf9f5 0%, #fbf3e8 100%);
-        }
-
-        .phase-input-card.phase-2:hover {
-            border-color: #e67e22;
-            box-shadow: 0 4px 16px rgba(243, 156, 18, 0.25);
-        }
-
-        .phase-input-card.phase-3 {
-            border-color: #9b59b6;
-            background: linear-gradient(135deg, #faf7fc 0%, #f4ebf8 100%);
-        }
-
-        .phase-input-card.phase-3:hover {
-            border-color: #8e44ad;
-            box-shadow: 0 4px 16px rgba(155, 89, 182, 0.25);
-        }
-
-        .phase-slider-container {
-            margin: 20px 0;
-        }
-
-        .phase-slider-label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .phase-timeline {
-            position: relative;
-            height: 60px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            margin: 20px 0;
-            overflow: visible;
-        }
-
-        .phase-segment {
-            position: absolute;
-            height: 100%;
-            top: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 0.9rem;
-            border-radius: 4px;
-        }
-
-        .phase-segment.phase-1 {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        }
-
-        .phase-segment.phase-2 {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-        }
-
-        .phase-segment.phase-3 {
-            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-        }
-
-        .phase-handle {
-            position: absolute;
-            width: 20px;
-            height: 80px;
-            background: white;
-            border: 3px solid #667eea;
-            border-radius: 4px;
-            top: -10px;
-            cursor: ew-resize;
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .phase-handle:hover {
-            border-color: #5568d3;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .phase-handle::after {
-            content: '⋮';
-            font-size: 16px;
-            color: #667eea;
-        }
-
-        .phase-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .phase-info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .phase-info-item {
-            background: linear-gradient(135deg, #fafbfc 0%, #f4f5f7 100%);
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 4px solid #ddd;
-        }
-
-        .phase-info-item.phase-1 {
-            border-left-color: #3498db;
-        }
-
-        .phase-info-item.phase-2 {
-            border-left-color: #f39c12;
-        }
-
-        .phase-info-item.phase-3 {
-            border-left-color: #9b59b6;
-        }
-
-        .phase-info-item strong {
-            display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 3px;
-        }
-
-        .phase-info-item span {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .simple-expense-group {
-            display: block;
-        }
-
-        .simple-expense-group.hidden {
-            display: none;
-        }
-
-        .view-toggle {
-            display: flex;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-md);
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-            padding: 4px;
-            border-radius: var(--radius-full);
-            border: 2px solid #c2d9ff;
-            width: fit-content;
-        }
-
-        .toggle-btn {
-            padding: 10px 24px;
-            border: none;
-            background: transparent;
-            color: #5f6b8a;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: var(--font-body);
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .toggle-btn:hover:not(.active) {
-            color: var(--on-surface);
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        @media (max-width: 1400px) {
-            .main-layout {
-                grid-template-columns: 1fr minmax(300px, 350px);
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .right-column {
-                position: static;
-                max-height: none;
-                overflow-y: visible;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-                margin-bottom: 20px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .input-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                height: 350px;
-            }
-
-            .summary-item p {
-                font-size: 1.5rem;
-            }
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #667eea;
-        }
-
-        .spinner {
-            border: 4px solid #f0f0f0;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+:root {
+  --bg: #0b0b0d;
+  --surface: #141317;
+  --surface-elevated: #18171c;
+  --surface-sunken: #0e0d10;
+  --hairline: rgba(240, 235, 224, 0.08);
+  --hairline-strong: rgba(240, 235, 224, 0.16);
+  --text-primary: #f1ece2;
+  --text-secondary: #a49c8e;
+  --text-tertiary: #706a60;
+
+  --gold: #c9a868;
+  --gold-bright: #d4af6a;
+  --gold-soft: rgba(201, 168, 104, 0.14);
+  --gold-ink: #1c1710;
+
+  --sage: #6fa98a;
+  --terracotta: #c97b5b;
+  --blue: #7c93b3;
+  --plum: #a688b0;
+  --teal: #5fa8a0;
+  --bronze: #b08d57;
+  --rose: #c08296;
+
+  /* Text/border-safe variants of the accents above. Identical to the base accent in dark mode;
+     overridden with darker steps under [data-theme="light"] so text stays >=4.5:1 on a light
+     surface. The base --gold/--sage/etc. stay untouched for uses that already carry their own
+     contrast (e.g. a filled button with --gold-ink text on top). */
+  --text-gold: var(--gold);
+  --text-sage: var(--sage);
+  --text-terracotta: var(--terracotta);
+  --text-blue: var(--blue);
+  --text-plum: var(--plum);
+  --text-teal: var(--teal);
+  --text-bronze: var(--bronze);
+  --text-rose: var(--rose);
+
+  --shimmer-a: var(--gold);
+  --shimmer-b: #f2e2ba;
+
+  color-scheme: dark;
+
+  /* Validated categorical chart palette (dataviz skill) - kept separate from the theme colors
+     above, which also carry unrelated UI meaning (success/warning states, phase colors). */
+  --chart-rose: #ba5661;
+  --chart-olive: #867d00;
+  --chart-teal: #009192;
+  --chart-bronze: #b16512;
+  --chart-indigo: #736dc3;
+  --chart-forest: #348f4f;
+  --chart-sky: #0c82bf;
+  --chart-plum: #a45b9f;
+
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+
+  --sp-xs: 6px;
+  --sp-sm: 10px;
+  --sp-md: 18px;
+  --sp-lg: 26px;
+  --sp-xl: 36px;
+}
+
+/* ================= Light theme ================= */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-elevated: #f7f5ef;
+  --surface-sunken: #efece3;
+  --hairline: rgba(11, 11, 11, 0.08);
+  --hairline-strong: rgba(11, 11, 11, 0.15);
+  --text-primary: #1c1a16;
+  --text-secondary: #5c574c;
+  --text-tertiary: #8a8477;
+
+  --gold-soft: rgba(137, 108, 65, 0.16);
+
+  /* Darkened, WCAG AA (>=4.5:1) text/border variants of each accent for a white surface. */
+  --text-gold: #8a6c31;
+  --text-sage: #4a7c61;
+  --text-terracotta: #ae5b39;
+  --text-blue: #597499;
+  --text-plum: #8a6497;
+  --text-teal: #437c76;
+  --text-bronze: #896d41;
+  --text-rose: #aa5671;
+
+  --shimmer-a: var(--text-gold);
+  --shimmer-b: var(--gold);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(1200px 700px at 88% -8%, rgba(201, 168, 104, 0.07), transparent 60%),
+    var(--bg);
+  min-height: 100vh;
+  padding: var(--sp-xl) var(--sp-lg) 80px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+.container { max-width: 1560px; margin: 0 auto; }
+
+.hero-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-gold);
+}
+
+h1 {
+  color: var(--text-primary);
+  margin: 10px 0 var(--sp-xl);
+  font-size: clamp(2.1rem, 3.6vw, 3.1rem);
+  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  padding-bottom: var(--sp-lg);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(340px, 420px);
+  gap: var(--sp-lg);
+  align-items: start;
+}
+
+.left-column, .right-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-lg);
+  min-width: 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-xl) var(--sp-xl);
+  box-shadow: 0 24px 48px -32px rgba(0, 0, 0, 0.65);
+  transition: border-color 0.25s ease;
+}
+
+.card:hover { border-color: var(--hairline-strong); }
+
+.card h2 {
+  color: var(--text-primary);
+  margin-bottom: var(--sp-lg);
+  font-size: 1.28rem;
+  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+  padding-bottom: var(--sp-md);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.panel-heading { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; }
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  margin-bottom: 4px;
+}
+
+.input-group { display: flex; flex-direction: column; gap: var(--sp-xs); }
+
+.input-group label {
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+}
+
+.tooltip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: help;
+  position: relative;
+  transition: all 0.2s ease;
+  border: 1px solid var(--hairline-strong);
+}
+
+.tooltip:hover { border-color: var(--text-gold); color: var(--text-gold); }
+
+.tooltip:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline-strong);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  white-space: normal;
+  width: max-content;
+  max-width: 240px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  z-index: 1000;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.input-group input,
+.input-group select {
+  padding: 13px 15px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.98rem;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+.input-group input:hover, .input-group select:hover { border-color: var(--text-tertiary); }
+
+.input-group input:focus, .input-group select:focus {
+  outline: none;
+  border-color: var(--text-gold);
+  box-shadow: 0 0 0 4px var(--gold-soft);
+}
+
+.input-group input.error, .input-group select.error {
+  border-color: var(--text-terracotta);
+  box-shadow: 0 0 0 4px rgba(201, 123, 91, 0.14);
+}
+
+.currency-selector { grid-column: 1 / -1; max-width: 320px; }
+
+.toggle-switch-container {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--surface-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  transition: border-color 0.2s ease;
+}
+
+.toggle-switch-container:hover { border-color: var(--hairline-strong); }
+
+.toggle-switch {
+  width: 46px;
+  height: 27px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-full);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex: none;
+}
+
+.toggle-switch.active { background: var(--gold); border-color: var(--gold); }
+
+.toggle-switch-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+}
+
+.toggle-switch.active .toggle-switch-slider { transform: translateX(19px); background: var(--gold-ink); }
+
+.toggle-switch-container label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.92rem;
+}
+
+.advanced-portfolio-section {
+  grid-column: 1 / -1;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+  border-width: 0;
+  border-style: solid;
+  border-color: var(--hairline-strong);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 var(--sp-lg);
+  margin-top: 0;
+  transition: max-height 0.5s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease,
+    padding 0.4s ease, margin-top 0.4s ease, border-width 0.3s ease;
+}
+
+.advanced-portfolio-section.active {
+  max-height: 2800px;
+  opacity: 1;
+  padding: var(--sp-lg);
+  margin-top: 15px;
+  border-width: 1px;
+}
+
+.asset-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-md);
+  margin-top: var(--sp-md);
+}
+
+.asset-class-card {
+  background: var(--surface-elevated);
+  padding: var(--sp-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  transition: border-color 0.2s ease;
+}
+
+.asset-class-card:hover { border-color: var(--hairline-strong); }
+
+.asset-class-card h4 {
+  color: var(--text-primary);
+  margin-bottom: var(--sp-md);
+  font-size: 0.96rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+}
+
+.slider-container { margin-bottom: var(--sp-md); }
+
+.slider-container label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--sp-xs);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.slider-value { font-weight: 700; color: var(--text-gold); font-size: 0.85rem; letter-spacing: 0; text-transform: none; }
+
+input[type="range"] {
+  width: 100%;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--hairline-strong);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: grab;
+  transition: transform 0.2s ease;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: grab;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.allocation-summary {
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
+  padding: var(--sp-md);
+  border-radius: var(--radius-md);
+  margin-top: var(--sp-lg);
+  text-align: center;
+}
+
+.allocation-total { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; font-family: var(--font-display); }
+.allocation-total.valid { color: var(--text-sage); }
+.allocation-total.invalid { color: var(--text-terracotta); }
+.allocation-message { font-size: 0.86rem; color: var(--text-secondary); }
+
+.simple-return-group, .simple-tax-group, .simple-expense-group { display: block; }
+.simple-return-group.hidden, .simple-tax-group.hidden, .simple-expense-group.hidden { display: none; }
+
+.real-estate-special { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-sm); margin-top: var(--sp-sm); }
+.real-estate-special .input-group { margin: 0; }
+.real-estate-special input { padding: 10px 12px; font-size: 0.9rem; }
+
+.error-message { color: var(--text-terracotta); font-size: 0.82rem; margin-top: 2px; display: none; }
+
+.summary-grid { display: flex; flex-direction: column; gap: var(--sp-sm); }
+
+.summary-item {
+  background: var(--surface-elevated);
+  padding: var(--sp-md) var(--sp-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  color: var(--text-primary);
+  text-align: left;
+  transition: border-color 0.2s ease;
+}
+
+.summary-item:hover { border-color: var(--hairline-strong); }
+
+.summary-item h3 {
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
+
+.summary-item p {
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.summary-item.warning { background: rgba(201, 123, 91, 0.09); border-color: rgba(201, 123, 91, 0.32); }
+.summary-item.warning p { color: var(--text-terracotta); }
+.summary-item.success { background: rgba(111, 169, 138, 0.09); border-color: rgba(111, 169, 138, 0.32); }
+.summary-item.success p { color: var(--text-sage); }
+
+.summary-item.accent-sage { background: rgba(111, 169, 138, 0.08); border-color: rgba(111, 169, 138, 0.26); }
+.summary-item.accent-sage p { color: var(--text-sage); }
+.summary-item.accent-plum { background: rgba(166, 136, 176, 0.09); border-color: rgba(166, 136, 176, 0.28); }
+.summary-item.accent-plum p { color: var(--text-plum); }
+.summary-item.accent-bronze { background: rgba(176, 141, 87, 0.09); border-color: rgba(176, 141, 87, 0.28); }
+.summary-item.accent-bronze p { color: var(--text-bronze); }
+.summary-item.accent-blue { background: rgba(124, 147, 179, 0.09); border-color: rgba(124, 147, 179, 0.28); }
+.summary-item.accent-blue p { color: var(--text-blue); }
+.summary-item.accent-teal { background: rgba(95, 168, 160, 0.09); border-color: rgba(95, 168, 160, 0.28); }
+.summary-item.accent-teal p { color: var(--text-teal); }
+
+.table-container { overflow-x: auto; margin-top: var(--sp-md); border: 1px solid var(--hairline); border-radius: var(--radius-md); }
+
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
+
+th {
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  padding: 15px 18px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--hairline-strong);
+}
+
+th:first-child { text-align: left; }
+
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+td:first-child { text-align: left; color: var(--text-secondary); font-weight: 600; }
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-elevated); }
+
+.chart-container { height: 440px; position: relative; }
+
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-sm); gap: var(--sp-md); flex-wrap: wrap; }
+.chart-header h2 { margin-bottom: 0; border-bottom: none; padding-bottom: 0; flex: 1; }
+
+.chart-subtitle { font-size: 0.82rem; color: var(--text-tertiary); margin-bottom: var(--sp-md); font-weight: 500; }
+
+.chart-type-toggle, .view-toggle {
+  display: flex;
+  gap: 3px;
+  background: var(--surface-sunken);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--hairline-strong);
+  width: fit-content;
+}
+
+.chart-type-btn, .toggle-btn {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.chart-type-btn.active, .toggle-btn.active { background: var(--gold); color: var(--gold-ink); }
+.chart-type-btn:hover:not(.active), .toggle-btn:hover:not(.active) { color: var(--text-primary); }
+
+.view-toggle { margin-bottom: var(--sp-md); }
+.toggle-btn { padding: 10px 22px; }
+
+.retirement-phases-section {
+  grid-column: 1 / -1;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+  border-width: 0;
+  border-style: solid;
+  border-color: var(--hairline-strong);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 var(--sp-lg);
+  margin-top: 0;
+  transition: max-height 0.5s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.4s ease,
+    padding 0.4s ease, margin-top 0.4s ease, border-width 0.3s ease;
+}
+
+.retirement-phases-section.active {
+  max-height: 2000px;
+  opacity: 1;
+  padding: var(--sp-lg);
+  margin-top: 15px;
+  border-width: 1px;
+}
+
+.phase-inputs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-md); margin-bottom: var(--sp-xl); }
+
+.phase-input-card {
+  background: var(--surface-elevated);
+  padding: var(--sp-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  transition: border-color 0.2s ease;
+}
+
+.phase-input-card:hover { border-color: var(--hairline-strong); }
+
+.phase-input-card h4 { margin: 0 0 10px 0; font-size: 0.98rem; font-weight: 700; color: var(--text-primary); font-family: var(--font-body); }
+.phase-input-card p { color: var(--text-tertiary) !important; }
+
+.phase-input-card.phase-1 h4 { color: var(--text-gold); }
+.phase-input-card.phase-2 h4 { color: var(--text-sage); }
+.phase-input-card.phase-3 h4 { color: var(--text-plum); }
+
+.phase-slider-container { margin: var(--sp-lg) 0; }
+.phase-slider-label { font-weight: 700; margin-bottom: var(--sp-md); color: var(--text-primary); font-size: 0.9rem; }
+
+.phase-timeline { position: relative; height: 52px; background: var(--surface-elevated); border: 1px solid var(--hairline); border-radius: var(--radius-sm); margin: var(--sp-lg) 0; overflow: visible; }
+
+.phase-segment { position: absolute; height: 100%; top: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.02em; border-radius: var(--radius-sm); }
+
+.phase-segment.phase-1 { background: rgba(201, 168, 104, 0.22); color: var(--text-gold); }
+.phase-segment.phase-2 { background: rgba(111, 169, 138, 0.22); color: var(--text-sage); }
+.phase-segment.phase-3 { background: rgba(166, 136, 176, 0.22); color: var(--text-plum); }
+
+.phase-handle {
+  position: absolute;
+  width: 18px;
+  height: 68px;
+  background: var(--surface);
+  border: 1px solid var(--text-gold);
+  border-radius: var(--radius-sm);
+  top: -8px;
+  cursor: ew-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.phase-handle:hover { background: var(--surface-elevated); }
+.phase-handle::before, .phase-handle::after { content: ''; width: 1px; height: 16px; background: var(--text-gold); display: block; }
+
+.phase-labels { display: flex; justify-content: space-between; margin-top: var(--sp-md); font-size: 0.82rem; color: var(--text-tertiary); }
+
+.phase-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-sm); margin-top: var(--sp-md); }
+
+.phase-info-item { background: var(--surface-elevated); padding: 13px 15px; border-radius: var(--radius-sm); border: 1px solid var(--hairline); }
+.phase-info-item strong { display: block; font-size: 0.72rem; color: var(--text-tertiary); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+.phase-info-item span { font-size: 0.94rem; font-weight: 600; color: var(--text-primary); }
+.phase-info-item.phase-1 strong { color: var(--text-gold); }
+.phase-info-item.phase-2 strong { color: var(--text-sage); }
+.phase-info-item.phase-3 strong { color: var(--text-plum); }
+
+.legend-dot { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); }
+.legend-dot::before { content: ''; width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dot-gold::before { background: var(--chart-rose); }
+.dot-plum::before { background: var(--chart-olive); }
+.dot-sage::before { background: var(--chart-teal); }
+.dot-terracotta::before { background: var(--chart-bronze); }
+.dot-blue::before { background: var(--chart-indigo); }
+.dot-rose::before { background: var(--chart-forest); }
+.dot-teal::before { background: var(--chart-sky); }
+.dot-bronze::before { background: var(--chart-plum); }
+
+.theme-toggle {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+.theme-toggle:hover { color: var(--text-primary); border-color: var(--hairline-strong); transform: translateY(-1px); }
+.theme-toggle svg { width: 17px; height: 17px; display: block; }
+.theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+
+@media (max-width: 768px) {
+  .theme-toggle { top: 14px; right: 14px; width: 36px; height: 36px; }
+}
+
+@media (max-width: 1400px) {
+  .main-layout { grid-template-columns: 1fr minmax(300px, 360px); }
+}
+
+@media (max-width: 1200px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .right-column { position: static; max-height: none; overflow-y: visible; }
+}
+
+@media (max-width: 768px) {
+  body { padding: var(--sp-lg) var(--sp-md) 60px; }
+  h1 { font-size: 1.8rem; margin-bottom: var(--sp-lg); }
+  .card { padding: var(--sp-lg); }
+  .input-grid { grid-template-columns: 1fr; gap: var(--sp-md); }
+  .phase-inputs-grid { grid-template-columns: 1fr; }
+  .phase-info { grid-template-columns: 1fr; }
+  .chart-container { height: 320px; }
+  .summary-item p { font-size: 1.3rem; }
+}
+
+
+/* ================= Animations ================= */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes softGlow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 26px 0 var(--glow-color, transparent); }
+}
+
+@keyframes shimmerLine {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  body { animation: fadeInUp 0.5s ease both; }
+
+  .hero-kicker {
+    display: inline-block;
+    background-image: linear-gradient(100deg, var(--shimmer-a) 30%, var(--shimmer-b) 50%, var(--shimmer-a) 70%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmerLine 7s linear infinite;
+  }
+
+  .left-column > .card, .right-column > .card {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .left-column > .card:nth-of-type(1) { animation-delay: 0.02s; }
+  .left-column > .card:nth-of-type(2) { animation-delay: 0.08s; }
+  .left-column > .card:nth-of-type(3) { animation-delay: 0.14s; }
+  .left-column > .card:nth-of-type(4) { animation-delay: 0.18s; }
+  .left-column > .card:nth-of-type(5) { animation-delay: 0.22s; }
+  .left-column > .card:nth-of-type(6) { animation-delay: 0.26s; }
+  .left-column > .card:nth-of-type(7) { animation-delay: 0.30s; }
+  .left-column > .card:nth-of-type(8) { animation-delay: 0.34s; }
+  .left-column > .card:nth-of-type(9) { animation-delay: 0.38s; }
+  .left-column > .card:nth-of-type(10) { animation-delay: 0.42s; }
+  .right-column > .card:nth-of-type(1) { animation-delay: 0.10s; }
+  .right-column > .card:nth-of-type(2) { animation-delay: 0.16s; }
+
+  .summary-item, .phase-info-item {
+    animation: fadeInUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  #summaryGrid .summary-item:nth-child(1) { animation-delay: 0.02s; }
+  #summaryGrid .summary-item:nth-child(2) { animation-delay: 0.06s; }
+  #summaryGrid .summary-item:nth-child(3) { animation-delay: 0.10s; }
+  #summaryGrid .summary-item:nth-child(4) { animation-delay: 0.14s; }
+  #summaryGrid .summary-item:nth-child(5) { animation-delay: 0.18s; }
+  #summaryGrid .summary-item:nth-child(6) { animation-delay: 0.22s; }
+  #summaryGrid .summary-item:nth-child(7) { animation-delay: 0.26s; }
+  #suggestionsGrid .summary-item:nth-child(1) { animation-delay: 0.02s; }
+  #suggestionsGrid .summary-item:nth-child(2) { animation-delay: 0.08s; }
+  #suggestionsGrid .summary-item:nth-child(3) { animation-delay: 0.14s; }
+
+  .summary-item.success {
+    animation: fadeInUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both,
+      softGlow 3.4s ease-in-out 0.6s infinite;
+    --glow-color: rgba(111, 169, 138, 0.16);
+  }
+  .summary-item.warning {
+    animation: fadeInUp 0.42s cubic-bezier(0.16, 1, 0.3, 1) both,
+      softGlow 3.4s ease-in-out 0.6s infinite;
+    --glow-color: rgba(201, 123, 91, 0.18);
+  }
+
+  tbody tr { animation: rowIn 0.4s ease both; }
+  tbody tr:nth-child(n+18) { animation: none; }
+
+  .card, .asset-class-card, .phase-input-card, .summary-item, .toggle-switch-container {
+    transition: border-color 0.25s ease, transform 0.25s ease;
+  }
+  .card:hover, .asset-class-card:hover, .phase-input-card:hover, .summary-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .chart-type-btn, .toggle-btn, .tooltip {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .chart-type-btn:active, .toggle-btn:active { transform: scale(0.94); }
+
+  .toggle-switch, .toggle-switch-slider {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  }
+
+  .phase-handle { transition: background 0.2s ease, border-color 0.2s ease; }
+
+  .chart-container canvas { animation: fadeInUp 0.5s ease both; }
+}
+
+
+.table-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--sp-md);
+}
+
+.table-expand-btn {
+  padding: 10px 22px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.table-expand-btn:hover {
+  border-color: var(--text-gold);
+  color: var(--text-gold);
+}
+
     </style>
 </head>
 <body>
+
+
+    <button type="button" id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-pressed="false" aria-label="Switch to light mode" title="Switch to light mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+
     <div class="container">
-        <h1>💰 FIRE Calculator</h1>
+        <div class="hero-kicker">Financial Independence, Retire Early</div>
+        <h1>FIRE Calculator</h1>
 
         <div class="main-layout">
             <div class="left-column">
@@ -1002,32 +927,32 @@
                 </div>
 
                 <div class="retirement-phases-section" id="retirementPhasesSection">
-                    <h3 style="margin: 0 0 15px 0; color: #27ae60;">
-                        <span class="tooltip" data-tip="Define different expense levels for early, mid, and late retirement">ℹ️</span>
+                    <h3 style="margin: 0 0 15px 0; color: var(--sage);" class="panel-heading">
+                        <span class="tooltip" data-tip="Define different expense levels for early, mid, and late retirement">?</span>
                         Retirement Phase Planning
                     </h3>
-                    
+
                     <div class="phase-inputs-grid">
                         <div class="phase-input-card phase-1">
-                            <h4>📈 Phase 1: Early Retirement</h4>
+                            <h4>Phase 1 — Early Retirement</h4>
                             <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Active years, higher spending</p>
                             <div class="input-group" style="margin: 0;">
                                 <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
                                 <input type="number" id="phase1Expense" value="60000" min="0" step="100">
                             </div>
                         </div>
-                        
+
                         <div class="phase-input-card phase-2">
-                            <h4>📊 Phase 2: Mid Retirement</h4>
+                            <h4>Phase 2 — Mid Retirement</h4>
                             <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Moderate spending</p>
                             <div class="input-group" style="margin: 0;">
                                 <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
                                 <input type="number" id="phase2Expense" value="50000" min="0" step="100">
                             </div>
                         </div>
-                        
+
                         <div class="phase-input-card phase-3">
-                            <h4>📉 Phase 3: Late Retirement</h4>
+                            <h4>Phase 3 — Late Retirement</h4>
                             <p style="font-size: 0.8rem; color: #666; margin: 0 0 10px 0;">Reduced spending</p>
                             <div class="input-group" style="margin: 0;">
                                 <label style="font-size: 0.85rem;">Monthly Expense (today's value)</label>
@@ -1040,7 +965,7 @@
                         <div class="phase-slider-label">
                             Phase Boundaries (Drag handles to adjust)
                         </div>
-                        
+
                         <div class="phase-timeline" id="phaseTimeline">
                             <div class="phase-segment phase-1" id="phaseSegment1">Phase 1</div>
                             <div class="phase-segment phase-2" id="phaseSegment2">Phase 2</div>
@@ -1048,7 +973,7 @@
                             <div class="phase-handle" id="phaseHandle1" data-handle="1"></div>
                             <div class="phase-handle" id="phaseHandle2" data-handle="2"></div>
                         </div>
-                        
+
                         <div class="phase-labels">
                             <span id="phaseStartLabel">Age 60</span>
                             <span id="phaseEndLabel">Age 85</span>
@@ -1090,7 +1015,7 @@
                 </div>
 
                 <div class="advanced-portfolio-section" id="advancedPortfolio">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Portfolio Allocation</h3>
+                    <h3 style="color: var(--gold); margin-bottom: 15px;" class="panel-heading">Portfolio Allocation</h3>
                     <div class="asset-class-grid">
                         <div class="asset-class-card">
                             <h4>Fixed Income</h4>
@@ -1229,8 +1154,8 @@
                 <div class="card">
                     <h2>Year-by-Year Breakdown</h2>
             <div class="view-toggle">
-                <button class="toggle-btn active" onclick="setView('yearly')">Yearly View</button>
-                <button class="toggle-btn" onclick="setView('monthly')">Monthly View</button>
+                <button class="toggle-btn active" onclick="setView('yearly', event)">Yearly View</button>
+                <button class="toggle-btn" onclick="setView('monthly', event)">Monthly View</button>
             </div>
             <div class="table-container">
                 <table id="breakdownTable">
@@ -1247,16 +1172,20 @@
                     </tbody>
                 </table>
             </div>
+            <div class="table-footer" id="tableFooterActions">
+                <button class="table-expand-btn" id="tableExpandToggle" onclick="toggleTableExpanded()" style="display:none;"></button>
+            </div>
                 </div>
 
                 <div class="card">
                     <div class="chart-header">
                         <h2>Corpus Over Time</h2>
                         <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('corpus', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('corpus', 'bar')">Bar</button>
+                            <button class="chart-type-btn active" onclick="toggleChartType('corpus', 'line', event)">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('corpus', 'bar', event)">Bar</button>
                         </div>
                     </div>
+                    <p class="chart-subtitle">Dashed line shows the same corpus deflated to today's purchasing power.</p>
                     <div class="chart-container">
                         <canvas id="corpusChart"></canvas>
                     </div>
@@ -1264,14 +1193,11 @@
 
                 <div class="card">
                     <div class="chart-header">
-                        <h2>Withdrawals & Taxes</h2>
-                        <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('withdrawal', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('withdrawal', 'bar')">Bar</button>
-                        </div>
+                        <h2>Retirement Cash Flow</h2>
                     </div>
+                    <p class="chart-subtitle">Each bar is the gross amount withdrawn from your corpus - split into what you actually spend and what goes to tax.</p>
                     <div class="chart-container">
-                        <canvas id="withdrawalChart"></canvas>
+                        <canvas id="cashFlowChart"></canvas>
                     </div>
                 </div>
 
@@ -1279,8 +1205,8 @@
                     <div class="chart-header">
                         <h2>Inflation-Adjusted Expenses</h2>
                         <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('expense', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('expense', 'bar')">Bar</button>
+                            <button class="chart-type-btn active" onclick="toggleChartType('expense', 'line', event)">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('expense', 'bar', event)">Bar</button>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -1288,25 +1214,13 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="chart-header">
-                        <h2>Real Value of Corpus (Today's Money)</h2>
-                        <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('realValue', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('realValue', 'bar')">Bar</button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="realValueChart"></canvas>
-                    </div>
-                </div>
 
                 <div class="card">
                     <div class="chart-header">
                         <h2>Investment Returns Over Time</h2>
                         <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('returns', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('returns', 'bar')">Bar</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('returns', 'line', event)">Line</button>
+                            <button class="chart-type-btn active" onclick="toggleChartType('returns', 'bar', event)">Bar</button>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -1316,6 +1230,7 @@
 
                 <div class="card" id="portfolioAllocationCard" style="display: none;">
                     <h2>Portfolio Allocation</h2>
+                    <p class="chart-subtitle">Ranked by weight - easier to compare close allocations than a pie.</p>
                     <div class="chart-container" style="height: 350px;">
                         <canvas id="allocationPieChart"></canvas>
                     </div>
@@ -1332,42 +1247,42 @@
                     <div class="chart-header">
                         <h2>Custom Chart Builder</h2>
                         <div class="chart-type-toggle">
-                            <button class="chart-type-btn active" onclick="toggleChartType('custom', 'line')">Line</button>
-                            <button class="chart-type-btn" onclick="toggleChartType('custom', 'bar')">Bar</button>
+                            <button class="chart-type-btn active" onclick="toggleChartType('custom', 'line', event)">Line</button>
+                            <button class="chart-type-btn" onclick="toggleChartType('custom', 'bar', event)">Bar</button>
                         </div>
                     </div>
                     <div style="margin-bottom: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customCorpus" onchange="updateCustomChart()" checked>
-                            <span style="color: #667eea; font-weight: 600;">● Corpus Value</span>
+                            <span class="legend-dot dot-gold">Corpus Value</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customRealCorpus" onchange="updateCustomChart()">
-                            <span style="color: #9b59b6; font-weight: 600;">● Real Corpus Value</span>
+                            <span class="legend-dot dot-plum">Real Corpus Value</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customWithdrawals" onchange="updateCustomChart()">
-                            <span style="color: #27ae60; font-weight: 600;">● Withdrawal (Pre-Tax)</span>
+                            <span class="legend-dot dot-sage">Withdrawal (Pre-Tax)</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customTaxes" onchange="updateCustomChart()">
-                            <span style="color: #e74c3c; font-weight: 600;">● Taxes Paid</span>
+                            <span class="legend-dot dot-terracotta">Taxes Paid</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customPostTax" onchange="updateCustomChart()">
-                            <span style="color: #f39c12; font-weight: 600;">● Post-Tax Withdrawal</span>
+                            <span class="legend-dot dot-blue">Post-Tax Withdrawal</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customReturns" onchange="updateCustomChart()">
-                            <span style="color: #2ecc71; font-weight: 600;">● Yearly Return</span>
+                            <span class="legend-dot dot-rose">Yearly Return</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customRealReturns" onchange="updateCustomChart()">
-                            <span style="color: #1abc9c; font-weight: 600;">● Real Yearly Return</span>
+                            <span class="legend-dot dot-teal">Real Yearly Return</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="customRentalIncome" onchange="updateCustomChart()">
-                            <span style="color: #16a085; font-weight: 600;">● Rental Income</span>
+                            <span class="legend-dot dot-bronze">Rental Income</span>
                         </label>
                     </div>
                     <div class="chart-container">
@@ -1392,22 +1307,25 @@
         </div>
     </div>
 
+    
+
     <script>
-        let corpusChart, withdrawalChart, expenseChart, realValueChart, returnsChart, customChart, allocationPieChart, assetContributionChart;
+
+        let corpusChart, cashFlowChart, expenseChart, returnsChart, customChart, allocationPieChart, assetContributionChart;
         let currentView = 'yearly';
         let calculationResults = null;
         let selectedCurrency = 'INR';
         let advancedMode = false;
         let retirementPhasesMode = false;
 
-        // Track chart types for each chart
+        // Track chart types. "Corpus Over Time" now always plots nominal + real together;
+        // "Withdrawals & Taxes" is now always a stacked bar (composition, not a line/bar toggle);
+        // "Investment Returns" defaults to bar since a yearly return is a per-period figure, not a path.
         let chartTypes = {
             custom: 'line',
             corpus: 'line',
-            withdrawal: 'line',
             expense: 'line',
-            realValue: 'line',
-            returns: 'line'
+            returns: 'bar'
         };
 
         // Retirement phases state
@@ -1418,6 +1336,8 @@
 
         let isDragging = false;
         let currentHandle = null;
+        let tableExpanded = false;
+        const TABLE_PAGE_SIZE = 10;
 
         const currencySymbols = {
             'INR': '₹',
@@ -1425,14 +1345,196 @@
             'CAD': 'C$'
         };
 
-        function toggleChartType(chartName, type) {
+
+        // Validated categorical palette (dataviz skill: OKLCH lightness/chroma bands, CVD-safe
+        // adjacent ordering, checked with validate_palette.js against this app's dark surface
+        // #141317). Fixed order - each role always gets the same slot, never reassigned by rank.
+        const PALETTE = {
+            rose:   '#ba5661',
+            olive:  '#867d00',
+            teal:   '#009192',
+            bronze: '#b16512',
+            indigo: '#736dc3',
+            forest: '#348f4f',
+            sky:    '#0c82bf',
+            plum:   '#a45b9f'
+        };
+        // Light/dark theme config. Same 8 categorical hues validated for both surfaces (see
+        // PALETTE above); only chart chrome (ink, gridlines, tooltip, the surface used for the
+        // stacked-bar "2px gap" cutout) changes between modes.
+        const THEMES = {
+            dark: {
+                surface: '#141317',
+                tooltipBg: '#0e0d10',
+                ink: {
+                    primary: '#f1ece2',
+                    secondary: '#a49c8e',
+                    muted: '#706a60',
+                    grid: 'rgba(240, 235, 224, 0.08)',
+                    baseline: 'rgba(240, 235, 224, 0.16)'
+                }
+            },
+            light: {
+                surface: '#ffffff',
+                tooltipBg: '#ffffff',
+                ink: {
+                    primary: '#1c1a16',
+                    secondary: '#5c574c',
+                    muted: '#8a8477',
+                    grid: 'rgba(11, 11, 11, 0.08)',
+                    baseline: 'rgba(11, 11, 11, 0.16)'
+                }
+            }
+        };
+        let currentTheme = 'dark';
+        let CHART_SURFACE = THEMES[currentTheme].surface;
+        let CHART_INK = THEMES[currentTheme].ink;
+
+        // Sets the global Chart.js theme (chrome colors only - the categorical PALETTE above is
+        // validated for both surfaces and never changes). Called once at load and again on every
+        // light/dark toggle; charts are then destroyed and rebuilt so the new colors take effect.
+        function applyChartTheme() {
+            if (typeof Chart === 'undefined') return;
+            const theme = THEMES[currentTheme];
+            CHART_SURFACE = theme.surface;
+            CHART_INK = theme.ink;
+
+            Chart.defaults.color = CHART_INK.secondary;
+            Chart.defaults.font.family = "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+            Chart.defaults.borderColor = CHART_INK.grid;
+            Chart.defaults.plugins.legend.labels.color = CHART_INK.secondary;
+            Chart.defaults.plugins.legend.labels.usePointStyle = true;
+            Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+            Chart.defaults.plugins.legend.labels.boxWidth = 8;
+            Chart.defaults.plugins.legend.labels.boxHeight = 8;
+            Chart.defaults.plugins.legend.labels.padding = 16;
+            Chart.defaults.plugins.legend.labels.font = { weight: '600' };
+            Chart.defaults.plugins.tooltip.backgroundColor = theme.tooltipBg;
+            Chart.defaults.plugins.tooltip.titleColor = CHART_INK.primary;
+            Chart.defaults.plugins.tooltip.bodyColor = CHART_INK.secondary;
+            Chart.defaults.plugins.tooltip.borderColor = CHART_INK.baseline;
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.padding = 10;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+            Chart.defaults.plugins.tooltip.boxPadding = 4;
+            Chart.defaults.scale.grid.color = CHART_INK.grid;
+            Chart.defaults.scale.border.color = CHART_INK.baseline;
+            Chart.defaults.scale.ticks.color = CHART_INK.muted;
+            Chart.defaults.elements.point.radius = 0;
+            Chart.defaults.elements.point.hoverRadius = 5;
+            Chart.defaults.elements.line.borderWidth = 2;
+        }
+
+        // Reference-line plugin: dashed vertical markers (retirement age, corpus-depletion age)
+        // so a reader can see WHEN a milestone lands on the timeline, not just what the line does.
+        // Registered once; reads live CHART_INK/mark colors at draw time so it tracks theme changes.
+        if (typeof Chart !== 'undefined') {
+            Chart.register({
+                id: 'ageMarkers',
+                afterDatasetsDraw(chart, args, opts) {
+                    const marks = opts && opts.marks;
+                    if (!marks || !marks.length) return;
+                    const { ctx, chartArea, scales } = chart;
+                    const xScale = scales.x;
+                    const labels = chart.data.labels;
+                    if (!xScale || !labels || !labels.length) return;
+                    ctx.save();
+                    marks.forEach((mark, i) => {
+                        let nearest = 0;
+                        let best = Infinity;
+                        for (let j = 0; j < labels.length; j++) {
+                            const d = Math.abs(labels[j] - mark.age);
+                            if (d < best) { best = d; nearest = j; }
+                        }
+                        const x = xScale.getPixelForValue(nearest);
+                        ctx.beginPath();
+                        ctx.setLineDash([4, 4]);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = mark.color || CHART_INK.muted;
+                        ctx.moveTo(x, chartArea.top);
+                        ctx.lineTo(x, chartArea.bottom);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = mark.color || CHART_INK.muted;
+                        ctx.font = "600 10px 'Manrope', -apple-system, sans-serif";
+                        ctx.textAlign = i % 2 === 0 ? 'left' : 'right';
+                        ctx.fillText(mark.label, x + (i % 2 === 0 ? 6 : -6), chartArea.top + 14);
+                    });
+                    ctx.restore();
+                }
+            });
+        }
+
+        // Retirement-age / corpus-depletion reference lines shared by every timeline chart.
+        function buildAgeMarkers() {
+            if (!calculationResults) return [];
+            const marks = [];
+            if (calculationResults.retirementAge != null) {
+                marks.push({ age: calculationResults.retirementAge, label: 'Retirement', color: CHART_INK.muted });
+            }
+            if (calculationResults.ruinAge) {
+                marks.push({ age: calculationResults.ruinAge, label: 'Corpus depleted', color: PALETTE.rose });
+            }
+            return marks;
+        }
+
+        // Light/dark mode - defaults to dark. Swaps the page's data-theme attribute (CSS handles
+        // the surface/text/border repaint) and rebuilds charts so Chart.js chrome matches.
+        function setTheme(theme) {
+            currentTheme = theme === 'light' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) {
+                const label = currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+                btn.setAttribute('aria-pressed', currentTheme === 'light' ? 'true' : 'false');
+                btn.setAttribute('aria-label', label);
+                btn.title = label;
+            }
+            applyChartTheme();
+            if (calculationResults) updateCharts();
+        }
+
+        function toggleTheme() {
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+        function debounce(fn, delay) {
+            let timer = null;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+        // Shared debounced entry point for rapid-fire events (typing, slider drag) so the full
+        // month-by-month simulation and chart rebuild don't re-run on every single keystroke.
+        const debouncedCalculate = debounce(() => calculateRetirement(), 250);
+
+        function chartsAvailable() {
+            if (typeof Chart === 'undefined') {
+                if (!document.getElementById('chartLibWarning')) {
+                    const warning = document.createElement('div');
+                    warning.id = 'chartLibWarning';
+                    warning.className = 'summary-item warning';
+                    warning.innerHTML = '<h3>Charts Unavailable</h3><p style="font-size:0.85rem; font-weight:400; margin-top:4px;">Could not load the Chart.js library (check your internet connection). The calculator itself still works - see the Summary, Suggestions and table below.</p>';
+                    const grid = document.getElementById('summaryGrid');
+                    if (grid && grid.parentNode) {
+                        grid.parentNode.insertBefore(warning, grid);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function toggleChartType(chartName, type, evt) {
             chartTypes[chartName] = type;
-            
+
             // Update button states
-            const buttons = event.target.parentElement.querySelectorAll('.chart-type-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
+            if (evt && evt.target) {
+                const buttons = evt.target.parentElement.querySelectorAll('.chart-type-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                evt.target.classList.add('active');
+            }
+
             // Redraw only the specific chart if calculation results exist
             if (calculationResults) {
                 updateSingleChart(chartName);
@@ -1440,304 +1542,305 @@
         }
 
         function updateSingleChart(chartName) {
-            const yearlyData = calculationResults.yearlyData;
-            const { inflationRate, currentAge } = calculationResults;
-            const symbol = currencySymbols[selectedCurrency];
-
-            const labels = yearlyData.map(d => d.age);
-            const corpusData = yearlyData.map(d => d.endBalance);
-            const withdrawalData = yearlyData.map(d => d.withdrawals);
-            const taxData = yearlyData.map(d => d.taxes);
-            const expenseData = yearlyData.map(d => d.expense * 12);
-            
-            const realValueData = yearlyData.map(d => {
-                const yearsFromNow = d.yearsSinceStart;
-                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
-                return d.endBalance / deflator;
-            });
-
-            const returnsData = yearlyData.map(d => d.returns || 0);
-            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
-
-            switch(chartName) {
+            if (!chartsAvailable()) return;
+            switch (chartName) {
                 case 'custom':
                     updateCustomChart();
                     break;
-
                 case 'corpus':
-                    if (corpusChart) corpusChart.destroy();
-                    const ctx1 = document.getElementById('corpusChart').getContext('2d');
-                    corpusChart = new Chart(ctx1, {
-                        type: chartTypes.corpus,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Corpus Value',
-                                data: corpusData,
-                                borderColor: '#667eea',
-                                backgroundColor: chartTypes.corpus === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                                borderWidth: chartTypes.corpus === 'line' ? 3 : 1,
-                                fill: chartTypes.corpus === 'line',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Corpus: ' + symbol + formatCurrency(context.parsed.y);
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return symbol + formatCurrencyShort(value);
-                                        }
-                                    }
-                                },
-                                x: { title: { display: true, text: 'Age' } }
-                            }
-                        }
-                    });
+                    buildCorpusChart();
                     break;
-
-                case 'withdrawal':
-                    if (withdrawalChart) withdrawalChart.destroy();
-                    const ctx2 = document.getElementById('withdrawalChart').getContext('2d');
-                    withdrawalChart = new Chart(ctx2, {
-                        type: chartTypes.withdrawal,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Annual Withdrawals',
-                                data: withdrawalData,
-                                borderColor: '#27ae60',
-                                backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
-                                borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
-                                fill: chartTypes.withdrawal === 'line',
-                                tension: 0.4
-                            }, {
-                                label: 'Annual Taxes',
-                                data: taxData,
-                                borderColor: '#e74c3c',
-                                backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
-                                borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
-                                fill: chartTypes.withdrawal === 'line',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return symbol + formatCurrencyShort(value);
-                                        }
-                                    }
-                                },
-                                x: { title: { display: true, text: 'Age' } }
-                            }
-                        }
-                    });
-                    break;
-
                 case 'expense':
-                    if (expenseChart) expenseChart.destroy();
-                    const ctx3 = document.getElementById('expenseChart').getContext('2d');
-                    expenseChart = new Chart(ctx3, {
-                        type: chartTypes.expense,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Annual Expenses',
-                                data: expenseData,
-                                borderColor: '#f39c12',
-                                backgroundColor: chartTypes.expense === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
-                                borderWidth: chartTypes.expense === 'line' ? 3 : 1,
-                                fill: chartTypes.expense === 'line',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Expenses: ' + symbol + formatCurrency(context.parsed.y);
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return symbol + formatCurrencyShort(value);
-                                        }
-                                    }
-                                },
-                                x: { title: { display: true, text: 'Age' } }
-                            }
-                        }
-                    });
+                    buildExpenseChart();
                     break;
-
-                case 'realValue':
-                    if (realValueChart) realValueChart.destroy();
-                    const ctx4 = document.getElementById('realValueChart').getContext('2d');
-                    realValueChart = new Chart(ctx4, {
-                        type: chartTypes.realValue,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Nominal Corpus Value',
-                                data: corpusData,
-                                borderColor: '#667eea',
-                                backgroundColor: chartTypes.realValue === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                                borderWidth: chartTypes.realValue === 'line' ? 2 : 1,
-                                fill: chartTypes.realValue === 'line' ? false : true,
-                                tension: 0.4,
-                                borderDash: chartTypes.realValue === 'line' ? [5, 5] : []
-                            }, {
-                                label: 'Real Value (Today\'s Money)',
-                                data: realValueData,
-                                borderColor: '#e74c3c',
-                                backgroundColor: chartTypes.realValue === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
-                                borderWidth: chartTypes.realValue === 'line' ? 3 : 1,
-                                fill: true,
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return symbol + formatCurrencyShort(value);
-                                        }
-                                    }
-                                },
-                                x: { title: { display: true, text: 'Age' } }
-                            }
-                        }
-                    });
-                    break;
-
                 case 'returns':
-                    if (returnsChart) returnsChart.destroy();
-                    const ctx5 = document.getElementById('returnsChart').getContext('2d');
-                    returnsChart = new Chart(ctx5, {
-                        type: chartTypes.returns,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Nominal Returns',
-                                data: returnsData,
-                                backgroundColor: chartTypes.returns === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                                borderColor: '#667eea',
-                                borderWidth: chartTypes.returns === 'line' ? 3 : 1,
-                                fill: true,
-                                tension: 0.4,
-                                pointRadius: chartTypes.returns === 'line' ? 4 : 0,
-                                pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
-                            }, {
-                                label: 'Inflation-Adjusted Returns',
-                                data: realReturnsData,
-                                backgroundColor: chartTypes.returns === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
-                                borderColor: '#2ecc71',
-                                borderWidth: chartTypes.returns === 'line' ? 3 : 1,
-                                fill: true,
-                                tension: 0.4,
-                                pointRadius: chartTypes.returns === 'line' ? 4 : 0,
-                                pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: true, position: 'top' },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            const value = context.parsed.y;
-                                            const sign = value >= 0 ? '+' : '';
-                                            return context.dataset.label + ': ' + sign + symbol + formatCurrency(Math.abs(value));
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            const sign = value >= 0 ? '+' : '-';
-                                            return sign + symbol + formatCurrencyShort(Math.abs(value));
-                                        }
-                                    },
-                                    title: { display: true, text: 'Returns' }
-                                },
-                                x: { title: { display: true, text: 'Age' } }
-                            }
-                        }
-                    });
+                    buildReturnsChart();
                     break;
             }
         }
 
+        function buildCorpusChart() {
+            if (!calculationResults || !chartsAvailable()) return;
+            const yearlyData = calculationResults.yearlyData;
+            const { inflationRate } = calculationResults;
+            const symbol = currencySymbols[selectedCurrency];
+            const labels = yearlyData.map(d => d.age);
+            const corpusData = yearlyData.map(d => d.endBalance);
+            const realValueData = yearlyData.map(d => {
+                const deflator = Math.pow(1 + inflationRate, d.yearsSinceStart);
+                return d.endBalance / deflator;
+            });
+
+            if (corpusChart) corpusChart.destroy();
+            const ctx = document.getElementById('corpusChart').getContext('2d');
+            corpusChart = new Chart(ctx, {
+                type: chartTypes.corpus,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Corpus Value',
+                        data: corpusData,
+                        borderColor: PALETTE.rose,
+                        backgroundColor: chartTypes.corpus === 'line' ? PALETTE.rose + '1a' : PALETTE.rose + '99',
+                        borderWidth: chartTypes.corpus === 'line' ? 2 : 1,
+                        fill: chartTypes.corpus === 'line',
+                        tension: 0.35
+                    }, {
+                        label: "Real Value (Today's Money)",
+                        data: realValueData,
+                        borderColor: PALETTE.olive,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 4],
+                        fill: false,
+                        tension: 0.35,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        ageMarkers: { marks: buildAgeMarkers() },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: function(value) { return symbol + formatCurrencyShort(value); } }
+                        },
+                        x: { title: { display: true, text: 'Age' } }
+                    }
+                }
+            });
+        }
+
+        function buildCashFlowChart() {
+            if (!calculationResults || !chartsAvailable()) return;
+            const yearlyData = calculationResults.yearlyData;
+            const symbol = currencySymbols[selectedCurrency];
+            const labels = yearlyData.map(d => d.age);
+            const postTaxData = yearlyData.map(d => d.withdrawals - d.taxes);
+            const taxData = yearlyData.map(d => d.taxes);
+
+            if (cashFlowChart) cashFlowChart.destroy();
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            cashFlowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Spending (Post-Tax)',
+                        data: postTaxData,
+                        backgroundColor: PALETTE.teal,
+                        stack: 'cashflow',
+                        borderColor: CHART_SURFACE,
+                        borderWidth: 2,
+                        borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4 },
+                        borderSkipped: false
+                    }, {
+                        label: 'Taxes',
+                        data: taxData,
+                        backgroundColor: PALETTE.bronze,
+                        stack: 'cashflow',
+                        borderColor: CHART_SURFACE,
+                        borderWidth: 2,
+                        borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        ageMarkers: { marks: buildAgeMarkers() },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
+                                },
+                                footer: function(items) {
+                                    const total = items.reduce((sum, item) => sum + item.parsed.y, 0);
+                                    return 'Gross withdrawal: ' + symbol + formatCurrency(total);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, title: { display: true, text: 'Age' } },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: { callback: function(value) { return symbol + formatCurrencyShort(value); } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function buildExpenseChart() {
+            if (!calculationResults || !chartsAvailable()) return;
+            const yearlyData = calculationResults.yearlyData;
+            const symbol = currencySymbols[selectedCurrency];
+            const labels = yearlyData.map(d => d.age);
+            const expenseData = yearlyData.map(d => d.expense * 12);
+
+            if (expenseChart) expenseChart.destroy();
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            expenseChart = new Chart(ctx, {
+                type: chartTypes.expense,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Annual Expenses',
+                        data: expenseData,
+                        borderColor: PALETTE.indigo,
+                        backgroundColor: chartTypes.expense === 'line' ? PALETTE.indigo + '1a' : PALETTE.indigo + '99',
+                        borderWidth: chartTypes.expense === 'line' ? 2 : 1,
+                        fill: chartTypes.expense === 'line',
+                        tension: 0.35
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        ageMarkers: { marks: buildAgeMarkers() },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Expenses: ' + symbol + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: function(value) { return symbol + formatCurrencyShort(value); } }
+                        },
+                        x: { title: { display: true, text: 'Age' } }
+                    }
+                }
+            });
+        }
+
+        function buildReturnsChart() {
+            if (!calculationResults || !chartsAvailable()) return;
+            const yearlyData = calculationResults.yearlyData;
+            const symbol = currencySymbols[selectedCurrency];
+            const labels = yearlyData.map(d => d.age);
+            const returnsData = yearlyData.map(d => d.returns || 0);
+            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
+            const isBar = chartTypes.returns === 'bar';
+
+            if (returnsChart) returnsChart.destroy();
+            const ctx = document.getElementById('returnsChart').getContext('2d');
+            returnsChart = new Chart(ctx, {
+                type: chartTypes.returns,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nominal Returns',
+                        data: returnsData,
+                        backgroundColor: isBar ? PALETTE.forest + '99' : PALETTE.forest + '1a',
+                        borderColor: PALETTE.forest,
+                        borderWidth: isBar ? 0 : 2,
+                        fill: !isBar,
+                        tension: 0.35,
+                        pointRadius: 0,
+                        borderRadius: isBar ? 3 : 0
+                    }, {
+                        label: 'Inflation-Adjusted Returns',
+                        data: realReturnsData,
+                        backgroundColor: isBar ? PALETTE.sky + '99' : PALETTE.sky + '1a',
+                        borderColor: PALETTE.sky,
+                        borderWidth: isBar ? 0 : 2,
+                        fill: !isBar,
+                        tension: 0.35,
+                        pointRadius: 0,
+                        borderRadius: isBar ? 3 : 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const sign = value >= 0 ? '+' : '-';
+                                    return context.dataset.label + ': ' + sign + symbol + formatCurrencyShort(Math.abs(value));
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    const sign = value >= 0 ? '+' : '-';
+                                    return sign + symbol + formatCurrencyShort(Math.abs(value));
+                                }
+                            },
+                            title: { display: true, text: 'Returns' },
+                            grid: {
+                                color: function(context) {
+                                    return context.tick.value === 0 ? CHART_INK.baseline : CHART_INK.grid;
+                                }
+                            }
+                        },
+                        x: { title: { display: true, text: 'Age' } }
+                    }
+                }
+            });
+        }
+
+        function customLineOrBarStyle(hex) {
+            const isLine = chartTypes.custom === 'line';
+            return {
+                borderColor: hex,
+                backgroundColor: isLine ? hex + '1a' : hex + '99',
+                borderWidth: isLine ? 2 : 1,
+                fill: isLine,
+                tension: 0.35,
+                pointRadius: 0
+            };
+        }
+
         function updateCustomChart() {
             if (!calculationResults) return;
+            if (!chartsAvailable()) return;
 
             const yearlyData = calculationResults.yearlyData;
             const { inflationRate } = calculationResults;
             const symbol = currencySymbols[selectedCurrency];
 
             const labels = yearlyData.map(d => d.age);
-            
-            // Prepare all data series
+
             const corpusData = yearlyData.map(d => d.endBalance);
             const realCorpusData = yearlyData.map(d => {
-                const yearsFromNow = d.yearsSinceStart;
-                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
+                const deflator = Math.pow(1 + inflationRate, d.yearsSinceStart);
                 return d.endBalance / deflator;
             });
             const withdrawalData = yearlyData.map(d => d.withdrawals);
@@ -1747,123 +1850,46 @@
             const realReturnsData = yearlyData.map(d => d.realReturns || 0);
             const rentalIncomeData = yearlyData.map(d => d.rentalIncome || 0);
 
-            // Build datasets based on selected checkboxes
             const datasets = [];
 
             if (document.getElementById('customCorpus').checked) {
-                datasets.push({
-                    label: 'Corpus Value',
-                    data: corpusData,
-                    borderColor: '#667eea',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Corpus Value', data: corpusData }, customLineOrBarStyle(PALETTE.rose)));
             }
-
             if (document.getElementById('customRealCorpus').checked) {
-                datasets.push({
-                    label: 'Real Corpus Value',
-                    data: realCorpusData,
-                    borderColor: '#9b59b6',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(155, 89, 182, 0.1)' : 'rgba(155, 89, 182, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Real Corpus Value', data: realCorpusData }, customLineOrBarStyle(PALETTE.olive)));
             }
-
             if (document.getElementById('customWithdrawals').checked) {
-                datasets.push({
-                    label: 'Withdrawal (Pre-Tax)',
-                    data: withdrawalData,
-                    borderColor: '#27ae60',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Withdrawal (Pre-Tax)', data: withdrawalData }, customLineOrBarStyle(PALETTE.teal)));
             }
-
             if (document.getElementById('customTaxes').checked) {
-                datasets.push({
-                    label: 'Taxes Paid',
-                    data: taxData,
-                    borderColor: '#e74c3c',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Taxes Paid', data: taxData }, customLineOrBarStyle(PALETTE.bronze)));
             }
-
             if (document.getElementById('customPostTax').checked) {
-                datasets.push({
-                    label: 'Post-Tax Withdrawal',
-                    data: postTaxData,
-                    borderColor: '#f39c12',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Post-Tax Withdrawal', data: postTaxData }, customLineOrBarStyle(PALETTE.indigo)));
             }
-
             if (document.getElementById('customReturns').checked) {
-                datasets.push({
-                    label: 'Yearly Return',
-                    data: returnsData,
-                    borderColor: '#2ecc71',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Yearly Return', data: returnsData }, customLineOrBarStyle(PALETTE.forest)));
             }
-
             if (document.getElementById('customRealReturns').checked) {
-                datasets.push({
-                    label: 'Real Yearly Return',
-                    data: realReturnsData,
-                    borderColor: '#1abc9c',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(26, 188, 156, 0.1)' : 'rgba(26, 188, 156, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Real Yearly Return', data: realReturnsData }, customLineOrBarStyle(PALETTE.sky)));
             }
-
             if (document.getElementById('customRentalIncome').checked) {
-                datasets.push({
-                    label: 'Rental Income',
-                    data: rentalIncomeData,
-                    borderColor: '#16a085',
-                    backgroundColor: chartTypes.custom === 'line' ? 'rgba(22, 160, 133, 0.1)' : 'rgba(22, 160, 133, 0.6)',
-                    borderWidth: chartTypes.custom === 'line' ? 3 : 1,
-                    fill: chartTypes.custom === 'line',
-                    tension: 0.4
-                });
+                datasets.push(Object.assign({ label: 'Rental Income', data: rentalIncomeData }, customLineOrBarStyle(PALETTE.plum)));
             }
 
-            // Destroy and recreate chart
             if (customChart) customChart.destroy();
-            
+
             const ctx = document.getElementById('customChart').getContext('2d');
             customChart = new Chart(ctx, {
                 type: chartTypes.custom,
-                data: {
-                    labels: labels,
-                    datasets: datasets
-                },
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
+                        legend: { display: true, position: 'top' },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1875,23 +1901,13 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
+                            ticks: { callback: function(value) { return symbol + formatCurrencyShort(value); } }
                         },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
+                        x: { title: { display: true, text: 'Age' } }
                     }
                 }
             });
         }
-
         function updateCurrencyLabels() {
             const symbol = currencySymbols[selectedCurrency];
             document.getElementById('corpusLabel').textContent = `Current Investment Corpus (${symbol})`;
@@ -1957,7 +1973,7 @@
         function initializePhaseSlider() {
             const retirementAge = parseInt(document.getElementById('retirementAge').value) || 60;
             const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value) || 85;
-            
+
             // Set default boundaries if not already set
             if (!phaseBoundaries.phase1End || phaseBoundaries.phase1End <= retirementAge) {
                 phaseBoundaries.phase1End = Math.min(retirementAge + 10, lifeExpectancy - 10);
@@ -2087,7 +2103,7 @@
             document.getElementById('midCapAlloc-value').textContent = allocations.midCap + '%';
             document.getElementById('smallCapAlloc-value').textContent = allocations.smallCap + '%';
 
-            const total = allocations.fixedIncome + allocations.realEstate + allocations.largeCap + 
+            const total = allocations.fixedIncome + allocations.realEstate + allocations.largeCap +
                          allocations.midCap + allocations.smallCap;
 
             const totalEl = document.getElementById('allocationTotal');
@@ -2112,7 +2128,7 @@
         document.querySelectorAll('input[type="range"]').forEach(slider => {
             slider.addEventListener('input', function() {
                 updateAllocationDisplay();
-                calculateRetirement();
+                debouncedCalculate();
             });
         });
 
@@ -2151,6 +2167,24 @@
                 isValid = false;
             }
 
+            const annualReturnVal = parseFloat(document.getElementById('annualReturn').value);
+            if (isNaN(annualReturnVal) || annualReturnVal < -20 || annualReturnVal > 30) {
+                errors.annualReturn = 'Return must be between -20% and 30%';
+                isValid = false;
+            }
+
+            const inflationRateVal = parseFloat(document.getElementById('inflationRate').value);
+            if (isNaN(inflationRateVal) || inflationRateVal < 0 || inflationRateVal > 20) {
+                errors.inflationRate = 'Inflation must be between 0% and 20%';
+                isValid = false;
+            }
+
+            const taxRateVal = parseFloat(document.getElementById('taxRate').value);
+            if (isNaN(taxRateVal) || taxRateVal < 0 || taxRateVal > 50) {
+                errors.taxRate = 'Tax rate must be between 0% and 50%';
+                isValid = false;
+            }
+
             document.querySelectorAll('.error-message').forEach(el => {
                 el.style.display = 'none';
                 el.textContent = '';
@@ -2186,11 +2220,12 @@
             const retirementAge = parseFloat(document.getElementById('retirementAge').value);
             const lifeExpectancy = parseFloat(document.getElementById('lifeExpectancy').value);
             let corpus = parseFloat(document.getElementById('currentCorpus').value);
-            
+            const monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value);
+
             // Get expenses based on mode
             let baseMonthlyExpenses;
             let phaseExpenses = null;
-            
+
             if (retirementPhasesMode) {
                 phaseExpenses = {
                     phase1: parseFloat(document.getElementById('phase1Expense').value),
@@ -2201,9 +2236,9 @@
             } else {
                 baseMonthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value);
             }
-            
+
             const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
-            
+
             let portfolioConfig = null;
             let annualReturn;
             let taxRate;
@@ -2228,7 +2263,7 @@
                 if (!retirementPhasesMode || !phaseExpenses) {
                     return baseMonthlyExpenses;
                 }
-                
+
                 if (age <= phaseBoundaries.phase1End) {
                     return phaseExpenses.phase1;
                 } else if (age <= phaseBoundaries.phase2End) {
@@ -2240,13 +2275,12 @@
 
             let monthlyData = [];
             let assetData = advancedMode ? initializeAssetTracking(corpus, portfolioConfig) : null;
-            let currentMonthlyExpense = baseMonthlyExpenses;
             let totalWithdrawals = 0;
             let totalTaxes = 0;
             let ruinAge = null;
 
             let totalRentalIncome = 0;
-            
+
             for (let month = 0; month < totalMonths; month++) {
                 const currentAgeAtMonth = currentAge + (month / 12);
                 const isRetired = currentAgeAtMonth >= retirementAge;
@@ -2274,12 +2308,15 @@
                 if (isRetired) {
                     // Get base expense for current age/phase
                     const baseExpense = getBaseExpenseForAge(currentAgeAtMonth);
-                    
-                    // Apply inflation from retirement age
-                    const yearsFromRetirement = currentAgeAtMonth - retirementAge;
-                    const inflationMultiplier = Math.pow(1 + inflationRate, yearsFromRetirement);
+
+                    // Expenses are entered in "today's value" (as of currentAge), so inflate
+                    // continuously from today - not just from retirement age onward. Otherwise
+                    // the years spent waiting to retire are ignored and the first withdrawal is
+                    // understated for anyone not retiring immediately.
+                    const yearsFromNow = currentAgeAtMonth - currentAge;
+                    const inflationMultiplier = Math.pow(1 + inflationRate, yearsFromNow);
                     netExpense = baseExpense * inflationMultiplier;
-                    
+
                     // Withdraw for expenses (with taxes) from overall corpus
                     if (netExpense > 0 && liquidCorpus > 0) {
                         const grossWithdrawal = netExpense / (1 - taxRate);
@@ -2304,7 +2341,7 @@
                     applyAssetReturns(assetData, portfolioConfig);
                     corpus = calculateTotalCorpus(assetData);
                     liquidCorpus = calculateLiquidCorpus(assetData);
-                    
+
                     if (isYearEnd) {
                         rebalancePortfolio(assetData, portfolioConfig);
                     }
@@ -2312,7 +2349,7 @@
                     const monthlyReturn = Math.pow(1 + annualReturn, 1/12) - 1;
                     corpus *= (1 + monthlyReturn);
                 }
-                
+
                 // Check for liquid corpus depletion
                 if (advancedMode && assetData) {
                     // Only mark as depleted if liquid corpus is gone AND rental income doesn't cover expenses
@@ -2327,8 +2364,8 @@
                 }
 
                 // Store actual expense for this month
-                const actualExpense = isRetired ? (getBaseExpenseForAge(currentAgeAtMonth) * Math.pow(1 + inflationRate, currentAgeAtMonth - retirementAge)) : 0;
-                
+                const actualExpense = isRetired ? (getBaseExpenseForAge(currentAgeAtMonth) * Math.pow(1 + inflationRate, currentAgeAtMonth - currentAge)) : 0;
+
                 const monthData = {
                     month: month,
                     age: currentAgeAtMonth,
@@ -2364,7 +2401,7 @@
                 }
             }
 
-            const yearlyData = aggregateToYearly(monthlyData);
+            const yearlyData = aggregateToYearly(monthlyData, inflationRate);
 
             let yearsAfterDeath = null;
             let isIndefinite = false;
@@ -2375,47 +2412,78 @@
             const retirementYears = lifeExpectancy - retirementAge;
             const retirementMonths = retirementYears * 12;
             const initialCorpusAtRetirement = monthlyData.find(m => m.isRetired)?.corpus || corpus;
-            
-            const realReturn = annualReturn - inflationRate;
-            const monthlyRealReturn = Math.pow(1 + realReturn, 1/12) - 1;
+
+            // Real monthly return used by the suggestions below. This has to be the
+            // EXACT compounded real rate (nominal-vs-inflation ratio), not the old
+            // annualReturn-minus-inflationRate approximation - that approximation runs
+            // consistently hot (overstates the real rate by a few hundredths of a
+            // percent a month), which alone was enough for "Required Corpus" to run
+            // out months before life expectancy when actually simulated.
+            const monthlyNominalReturn = Math.pow(1 + annualReturn, 1/12) - 1;
+            const monthlyInflationForSuggestions = Math.pow(1 + inflationRate, 1/12) - 1;
+            const monthlyRealReturn = (1 + monthlyNominalReturn) / (1 + monthlyInflationForSuggestions) - 1;
 
             if (retirementMonths > 0) {
-                const pvifaDeplete = (1 - Math.pow(1 + monthlyRealReturn, -retirementMonths)) / monthlyRealReturn;
-                
+                // Textbook PV-of-annuity factor assumes each withdrawal lands at the
+                // END of its period. The simulation above withdraws at the START of
+                // each retirement month and only then applies that month's growth, so
+                // every payment is discounted one period less than the textbook
+                // formula assumes - i.e. it's an annuity-DUE. Scaling by (1+r)
+                // converts the ordinary-annuity factor to match how the simulation
+                // actually spends the money.
+                const pvifaOrdinary = (1 - Math.pow(1 + monthlyRealReturn, -retirementMonths)) / monthlyRealReturn;
+                const pvifaDeplete = pvifaOrdinary * (1 + monthlyRealReturn);
+
                 if (pvifaDeplete > 0) {
                     const grossMonthlyExpense = monthlyExpenses / (1 - taxRate);
                     suggestedCorpusForExpenses = grossMonthlyExpense * pvifaDeplete;
-                    
+
                     if (initialCorpusAtRetirement > 0) {
                         suggestedWithdrawalToDeplete = (initialCorpusAtRetirement / pvifaDeplete) * (1 - taxRate);
                     }
                 }
 
                 if (Math.abs(monthlyRealReturn) > 0.0001 && initialCorpusAtRetirement > 0) {
-                    suggestedWithdrawalStable = initialCorpusAtRetirement * monthlyRealReturn * (1 - taxRate);
+                    // Perpetual, real-value-preserving withdrawal - also withdrawn
+                    // before that month's growth, so it's C - C/(1+r), not C*r.
+                    suggestedWithdrawalStable = initialCorpusAtRetirement * (monthlyRealReturn / (1 + monthlyRealReturn)) * (1 - taxRate);
                 } else {
                     suggestedWithdrawalStable = 0;
                 }
             }
 
             if (ruinAge === null && corpus > 0) {
-                const lastMonthExpense = currentMonthlyExpense;
+                // Project forward past life expectancy using the actual final (fully-inflated)
+                // expense - not an un-inflated base value - so the projection matches what the
+                // simulation itself would withdraw if it kept running.
+                const finalBaseExpense = getBaseExpenseForAge(lifeExpectancy);
+                const lastMonthExpense = finalBaseExpense * Math.pow(1 + inflationRate, lifeExpectancy - currentAge);
+
                 let testCorpus = corpus;
-                let monthsAfterDeath = 0;
+                // Clone (not alias) the asset state: mutating a shared reference here would
+                // corrupt the real assetData used for the final summary figures.
+                let testAssets = (advancedMode && assetData) ? cloneAssetData(assetData) : null;
+                let depletedWithinWindow = false;
                 const maxMonthsToTest = 1200;
 
                 for (let i = 0; i < maxMonthsToTest; i++) {
                     const netExpense = lastMonthExpense * Math.pow(1 + monthlyInflation, i);
                     const grossWithdrawal = netExpense / (1 - taxRate);
-                    testCorpus -= grossWithdrawal;
+
+                    if (testAssets) {
+                        withdrawProportionally(testAssets, grossWithdrawal);
+                        testCorpus = calculateTotalCorpus(testAssets);
+                    } else {
+                        testCorpus -= grossWithdrawal;
+                    }
 
                     if (testCorpus <= 0) {
                         yearsAfterDeath = (i / 12).toFixed(1);
+                        depletedWithinWindow = true;
                         break;
                     }
 
-                    if (advancedMode && assetData) {
-                        const testAssets = { ...assetData };
+                    if (testAssets) {
                         applyAssetReturns(testAssets, portfolioConfig);
                         testCorpus = calculateTotalCorpus(testAssets);
                     } else {
@@ -2424,9 +2492,10 @@
                     }
                 }
 
-                if (monthsAfterDeath === 0) {
-                    isIndefinite = true;
-                }
+                // Only truly "indefinite" if it survived the whole test window without
+                // depleting. Previously this used a counter that was never incremented, so it
+                // was always true even when yearsAfterDeath had a finite, real answer.
+                isIndefinite = !depletedWithinWindow;
             }
 
             // Determine sustainability based on liquid corpus in advanced mode
@@ -2434,7 +2503,7 @@
             if (advancedMode && assetData) {
                 finalLiquidCorpus = calculateLiquidCorpus(assetData);
             }
-            
+
             const isSustainable = ruinAge === null && (advancedMode ? finalLiquidCorpus > 0 : corpus > 0);
 
             calculationResults = {
@@ -2521,7 +2590,7 @@
                     rentalYield: 0
                 }
             };
-            
+
             for (const asset in config) {
                 if (asset === 'realEstate') {
                     assets.realEstate.propertyValue = totalCorpus * config[asset].allocation;
@@ -2530,11 +2599,21 @@
                     assets.liquid[asset] = totalCorpus * config[asset].allocation;
                 }
             }
-            
+
             // Add rental surplus category (starts at 0, grows only from surplus rental income)
             assets.liquid.rentalSurplus = 0;
-            
+
             return assets;
+        }
+
+        function cloneAssetData(assets) {
+            // A deep-enough clone: liquid/realEstate only ever hold primitive numbers, so
+            // copying each nested object is sufficient - and, critically, does NOT share
+            // references with the original the way a shallow `{ ...assets }` spread does.
+            return {
+                liquid: { ...assets.liquid },
+                realEstate: { ...assets.realEstate }
+            };
         }
 
         function withdrawProportionally(assets, amount) {
@@ -2560,7 +2639,7 @@
                     assets.liquid[asset] *= (1 + monthlyReturn);
                 }
             }
-            
+
             // Apply appreciation to real estate property value
             if (assets.realEstate.propertyValue > 0) {
                 const realEstateAppreciation = parseFloat(document.getElementById('realEstateAppreciation').value) / 100;
@@ -2576,13 +2655,13 @@
             }
             return total;
         }
-        
+
         function calculateTotalCorpus(assets) {
             let total = calculateLiquidCorpus(assets);
             total += assets.realEstate.propertyValue;
             return total;
         }
-        
+
         function calculateMonthlyRentalIncome(assets) {
             if (assets.realEstate.propertyValue > 0) {
                 return assets.realEstate.propertyValue * (assets.realEstate.rentalYield / 12);
@@ -2593,10 +2672,10 @@
         function rebalancePortfolio(assets, config) {
             // Only rebalance liquid assets, real estate and rentalSurplus stay separate
             const liquidTotal = calculateLiquidCorpus(assets);
-            
+
             // Preserve rentalSurplus before rebalancing
             const rentalSurplusAmount = assets.liquid.rentalSurplus || 0;
-            
+
             // Calculate total allocation for liquid assets (excluding real estate)
             let liquidAllocation = 0;
             for (const asset in config) {
@@ -2604,10 +2683,10 @@
                     liquidAllocation += config[asset].allocation;
                 }
             }
-            
+
             // Calculate rebalanceable amount (total liquid - rental surplus)
             const rebalanceableAmount = liquidTotal - rentalSurplusAmount;
-            
+
             // Rebalance liquid assets proportionally (excluding rentalSurplus)
             if (liquidAllocation > 0 && rebalanceableAmount > 0) {
                 for (const asset in assets.liquid) {
@@ -2620,12 +2699,12 @@
                     }
                 }
             }
-            
+
             // Restore rentalSurplus
             assets.liquid.rentalSurplus = rentalSurplusAmount;
         }
 
-        function aggregateToYearly(monthlyData) {
+        function aggregateToYearly(monthlyData, inflationRate) {
             const yearlyData = [];
             let currentYear = null;
             let yearData = null;
@@ -2688,13 +2767,14 @@
                     const startBalance = yearlyData[i].startBalance;
                     const endBalance = yearlyData[i].endBalance;
                     const withdrawals = yearlyData[i].withdrawals;
-                    
+
                     // Calculate nominal returns (growth + withdrawals - starting balance)
                     const returns = (endBalance + withdrawals) - startBalance;
                     yearlyData[i].returns = returns;
-                    
-                    // Calculate real returns (adjusted for inflation)
-                    const inflationRate = calculationResults ? calculationResults.inflationRate : 0;
+
+                    // Calculate real returns (adjusted for inflation), using the rate for
+                    // THIS run (calculationResults isn't assigned yet while this executes, so
+                    // reading it here previously used a stale, one-run-behind inflation rate).
                     const inflationAdjustment = startBalance * inflationRate;
                     yearlyData[i].realReturns = returns - inflationAdjustment;
                 }
@@ -2711,14 +2791,14 @@
         }
 
         function updateSummary() {
-            const { finalCorpus, finalLiquidCorpus, totalWithdrawals, totalTaxes, totalRentalIncome, ruinAge, isSustainable, 
+            const { finalCorpus, finalLiquidCorpus, totalWithdrawals, totalTaxes, totalRentalIncome, ruinAge, isSustainable,
                     yearsAfterDeath, isIndefinite, lifeExpectancy, advancedMode } = calculationResults;
             const symbol = currencySymbols[selectedCurrency];
 
             let depletionInfo = '';
             if (ruinAge) {
-                const warningText = advancedMode ? 
-                    `<small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px; color: #fff;">⚠️ Liquid assets depleted. Rebalance portfolio!</small>` : '';
+                const warningText = advancedMode ?
+                    `<small style="font-size: 0.75rem; opacity: 0.85; display: block; margin-top: 5px;">Liquid assets depleted — rebalance the portfolio.</small>` : '';
                 depletionInfo = `
                     <div class="summary-item warning">
                         <h3>${advancedMode ? 'Liquid Corpus Depletion Age' : 'Corpus Depletion Age'}</h3>
@@ -2730,7 +2810,7 @@
                 depletionInfo = `
                     <div class="summary-item success">
                         <h3>Corpus Longevity</h3>
-                        <p>♾️ Indefinite</p>
+                        <p>Indefinite</p>
                     </div>
                 `;
             } else if (yearsAfterDeath) {
@@ -2747,7 +2827,7 @@
             let rentalIncomeSection = '';
             if (advancedMode && totalRentalIncome > 0) {
                 rentalIncomeSection = `
-                    <div class="summary-item" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                    <div class="summary-item accent-sage">
                         <h3>Total Rental Income</h3>
                         <p>${symbol}${formatCurrency(totalRentalIncome)}</p>
                         <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
@@ -2769,7 +2849,7 @@
                             Withdrawable
                         </small>
                     </div>
-                    <div class="summary-item" style="background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);">
+                    <div class="summary-item accent-plum">
                         <h3>Real Estate (Final)</h3>
                         <p>${symbol}${formatCurrency(realEstateValue)}</p>
                         <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
@@ -2793,7 +2873,7 @@
             const summaryHTML = `
                 <div class="summary-item ${isSustainable ? 'success' : 'warning'}">
                     <h3>Plan Status</h3>
-                    <p>${isSustainable ? '✓ Sustainable' : '✗ Not Sustainable'}</p>
+                    <p>${isSustainable ? 'Sustainable' : 'Not Sustainable'}</p>
                 </div>
                 ${depletionInfo}
                 ${corpusSection}
@@ -2812,7 +2892,7 @@
         }
 
         function updateSuggestions() {
-            const { suggestedWithdrawalToDeplete, suggestedWithdrawalStable, 
+            const { suggestedWithdrawalToDeplete, suggestedWithdrawalStable,
                     suggestedCorpusForExpenses, monthlyExpenses, isSustainable } = calculationResults;
             const symbol = currencySymbols[selectedCurrency];
 
@@ -2820,7 +2900,7 @@
 
             if (suggestedCorpusForExpenses !== null && suggestedCorpusForExpenses > 0) {
                 suggestionsHTML += `
-                    <div class="summary-item" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);">
+                    <div class="summary-item accent-bronze">
                         <h3>Required Corpus</h3>
                         <p>${symbol}${formatCurrency(suggestedCorpusForExpenses)}</p>
                         <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
@@ -2832,9 +2912,9 @@
 
             if (suggestedWithdrawalToDeplete !== null && suggestedWithdrawalToDeplete > 0) {
                 const depleteLabel = isSustainable ? 'Max Withdrawal' : 'To Last Till Death';
-                
+
                 suggestionsHTML += `
-                    <div class="summary-item" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                    <div class="summary-item accent-blue">
                         <h3>${depleteLabel}</h3>
                         <p>${symbol}${formatCurrency(suggestedWithdrawalToDeplete)}</p>
                         <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
@@ -2843,12 +2923,12 @@
                     </div>
                 `;
             }
-            
+
             if (suggestedWithdrawalStable !== null && suggestedWithdrawalStable > 0) {
                 const stableLabel = isSustainable ? 'Perpetual Withdrawal' : 'For Stable Corpus';
-                
+
                 suggestionsHTML += `
-                    <div class="summary-item" style="background: linear-gradient(135deg, #16a085 0%, #138f77 100%);">
+                    <div class="summary-item accent-teal">
                         <h3>${stableLabel}</h3>
                         <p>${symbol}${formatCurrency(suggestedWithdrawalStable)}</p>
                         <small style="font-size: 0.75rem; opacity: 0.9; display: block; margin-top: 5px;">
@@ -2867,12 +2947,13 @@
             const thead = document.getElementById('tableHeader');
             const symbol = currencySymbols[selectedCurrency];
             const { advancedMode } = calculationResults;
-            
+            const expandBtn = document.getElementById('tableExpandToggle');
+
             // Check if we have real estate data
             const hasRealEstate = advancedMode && data.some(row => {
                 return row.assetValues && row.assetValues.realEstate && row.assetValues.realEstate.propertyValue > 0;
             });
-            
+
             // Update table header based on mode
             if (hasRealEstate) {
                 thead.innerHTML = `
@@ -2896,9 +2977,10 @@
                     </tr>
                 `;
             }
-            
+
             let html = '';
-            const displayData = currentView === 'yearly' ? data : data.filter((_, i) => i % 3 === 0);
+            const fullDisplayData = currentView === 'yearly' ? data : data.filter((_, i) => i % 3 === 0);
+            const displayData = tableExpanded ? fullDisplayData : fullDisplayData.slice(0, TABLE_PAGE_SIZE);
 
             displayData.forEach(row => {
                 const age = currentView === 'yearly' ? row.age : row.age.toFixed(1);
@@ -2908,16 +2990,16 @@
                 if (hasRealEstate) {
                     // Get total corpus
                     const totalCorpus = currentView === 'yearly' ? (row.endBalance || 0) : (row.corpus || 0);
-                    
+
                     // Get real estate value from assetValues
                     let realEstateValue = 0;
                     if (row.assetValues && row.assetValues.realEstate) {
                         realEstateValue = row.assetValues.realEstate.propertyValue || 0;
                     }
-                    
+
                     // Calculate liquid corpus as total minus real estate
                     const liquidBalance = totalCorpus - realEstateValue;
-                    
+
                     html += `
                         <tr>
                             <td>${age}</td>
@@ -2931,7 +3013,7 @@
                 } else {
                     const startBalance = currentView === 'yearly' ? row.startBalance : row.corpus;
                     const endBalance = currentView === 'yearly' ? row.endBalance : row.corpus;
-                    
+
                     html += `
                         <tr>
                             <td>${age}</td>
@@ -2945,323 +3027,26 @@
             });
 
             tbody.innerHTML = html;
+
+            if (expandBtn) {
+                if (fullDisplayData.length > TABLE_PAGE_SIZE) {
+                    expandBtn.style.display = 'inline-flex';
+                    expandBtn.textContent = tableExpanded
+                        ? 'Show fewer'
+                        : `Show all ${fullDisplayData.length} rows`;
+                } else {
+                    expandBtn.style.display = 'none';
+                }
+            }
         }
 
         function updateCharts() {
-            const yearlyData = calculationResults.yearlyData;
-            const { inflationRate, currentAge } = calculationResults;
-            const symbol = currencySymbols[selectedCurrency];
-
-            const labels = yearlyData.map(d => d.age);
-            const corpusData = yearlyData.map(d => d.endBalance);
-            const withdrawalData = yearlyData.map(d => d.withdrawals);
-            const taxData = yearlyData.map(d => d.taxes);
-            const expenseData = yearlyData.map(d => d.expense * 12);
-            
-            const realValueData = yearlyData.map(d => {
-                const yearsFromNow = d.yearsSinceStart;
-                const deflator = Math.pow(1 + inflationRate, yearsFromNow);
-                return d.endBalance / deflator;
-            });
-
-            const returnsData = yearlyData.map(d => d.returns || 0);
-            const realReturnsData = yearlyData.map(d => d.realReturns || 0);
-
-            if (customChart) customChart.destroy();
-            if (corpusChart) corpusChart.destroy();
-            if (withdrawalChart) withdrawalChart.destroy();
-            if (expenseChart) expenseChart.destroy();
-            if (realValueChart) realValueChart.destroy();
-            if (returnsChart) returnsChart.destroy();
-
-            // Update custom chart first
+            if (!chartsAvailable()) return;
             updateCustomChart();
-
-            const ctx1 = document.getElementById('corpusChart').getContext('2d');
-            corpusChart = new Chart(ctx1, {
-                type: chartTypes.corpus,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Corpus Value',
-                        data: corpusData,
-                        borderColor: '#667eea',
-                        backgroundColor: chartTypes.corpus === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                        borderWidth: chartTypes.corpus === 'line' ? 3 : 1,
-                        fill: chartTypes.corpus === 'line',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Corpus: ' + symbol + formatCurrency(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
-                    }
-                }
-            });
-
-            const ctx2 = document.getElementById('withdrawalChart').getContext('2d');
-            withdrawalChart = new Chart(ctx2, {
-                type: chartTypes.withdrawal,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Annual Withdrawals',
-                        data: withdrawalData,
-                        borderColor: '#27ae60',
-                        backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(39, 174, 96, 0.1)' : 'rgba(39, 174, 96, 0.6)',
-                        borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
-                        fill: chartTypes.withdrawal === 'line',
-                        tension: 0.4
-                    }, {
-                        label: 'Annual Taxes',
-                        data: taxData,
-                        borderColor: '#e74c3c',
-                        backgroundColor: chartTypes.withdrawal === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
-                        borderWidth: chartTypes.withdrawal === 'line' ? 3 : 1,
-                        fill: chartTypes.withdrawal === 'line',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
-                    }
-                }
-            });
-
-            const ctx3 = document.getElementById('expenseChart').getContext('2d');
-            expenseChart = new Chart(ctx3, {
-                type: chartTypes.expense,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Annual Expenses',
-                        data: expenseData,
-                        borderColor: '#f39c12',
-                        backgroundColor: chartTypes.expense === 'line' ? 'rgba(243, 156, 18, 0.1)' : 'rgba(243, 156, 18, 0.6)',
-                        borderWidth: chartTypes.expense === 'line' ? 3 : 1,
-                        fill: chartTypes.expense === 'line',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Expenses: ' + symbol + formatCurrency(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
-                    }
-                }
-            });
-
-            const ctx4 = document.getElementById('realValueChart').getContext('2d');
-            realValueChart = new Chart(ctx4, {
-                type: chartTypes.realValue,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Nominal Corpus Value',
-                        data: corpusData,
-                        borderColor: '#667eea',
-                        backgroundColor: chartTypes.realValue === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                        borderWidth: chartTypes.realValue === 'line' ? 2 : 1,
-                        fill: chartTypes.realValue === 'line' ? false : true,
-                        tension: 0.4,
-                        borderDash: chartTypes.realValue === 'line' ? [5, 5] : []
-                    }, {
-                        label: 'Real Value (Today\'s Money)',
-                        data: realValueData,
-                        borderColor: '#e74c3c',
-                        backgroundColor: chartTypes.realValue === 'line' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(231, 76, 60, 0.6)',
-                        borderWidth: chartTypes.realValue === 'line' ? 3 : 1,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + symbol + formatCurrency(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
-                    }
-                }
-            });
-
-            const ctx5 = document.getElementById('returnsChart').getContext('2d');
-            returnsChart = new Chart(ctx5, {
-                type: chartTypes.returns,
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Nominal Returns',
-                        data: returnsData,
-                        backgroundColor: chartTypes.returns === 'line' ? 'rgba(102, 126, 234, 0.1)' : 'rgba(102, 126, 234, 0.6)',
-                        borderColor: '#667eea',
-                        borderWidth: chartTypes.returns === 'line' ? 3 : 1,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: chartTypes.returns === 'line' ? 4 : 0,
-                        pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
-                    }, {
-                        label: 'Inflation-Adjusted Returns',
-                        data: realReturnsData,
-                        backgroundColor: chartTypes.returns === 'line' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(46, 204, 113, 0.6)',
-                        borderColor: '#2ecc71',
-                        borderWidth: chartTypes.returns === 'line' ? 3 : 1,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: chartTypes.returns === 'line' ? 4 : 0,
-                        pointHoverRadius: chartTypes.returns === 'line' ? 6 : 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    const sign = value >= 0 ? '+' : '';
-                                    return context.dataset.label + ': ' + sign + symbol + formatCurrency(Math.abs(value));
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    const sign = value >= 0 ? '+' : '-';
-                                    return sign + symbol + formatCurrencyShort(Math.abs(value));
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Returns'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
-                    }
-                }
-            });
+            buildCorpusChart();
+            buildCashFlowChart();
+            buildExpenseChart();
+            buildReturnsChart();
 
             if (calculationResults.advancedMode && calculationResults.portfolioConfig) {
                 updatePortfolioCharts();
@@ -3284,53 +3069,66 @@
                 rentalSurplus: 'Rental Income'
             };
 
+            // Fixed categorical order, one slot per asset class - never reassigned by rank, so an
+            // asset keeps its color even as allocations change. (Previously fixedIncome/midCap and
+            // realEstate/rentalSurplus shared identical hex values here.)
             const assetColors = {
-                fixedIncome: '#3498db',
-                realEstate: '#e67e22',
-                largeCap: '#2ecc71',
-                midCap: '#f39c12',
-                smallCap: '#9b59b6',
-                rentalSurplus: '#16a085'
+                fixedIncome: PALETTE.rose,
+                realEstate: PALETTE.olive,
+                largeCap: PALETTE.teal,
+                midCap: PALETTE.bronze,
+                smallCap: PALETTE.indigo,
+                rentalSurplus: PALETTE.forest
             };
 
-            const allocations = [];
-            const labels = [];
-            const colors = [];
-
+            const allocationRows = [];
             for (const asset in portfolioConfig) {
                 if (portfolioConfig[asset].allocation > 0) {
-                    allocations.push((portfolioConfig[asset].allocation * 100).toFixed(1));
-                    labels.push(assetNames[asset]);
-                    colors.push(assetColors[asset]);
+                    allocationRows.push({
+                        label: assetNames[asset],
+                        pct: portfolioConfig[asset].allocation * 100,
+                        color: assetColors[asset]
+                    });
                 }
             }
+            allocationRows.sort((a, b) => b.pct - a.pct);
 
+            // Ranked horizontal bar instead of a pie: precise comparison of close allocations, and
+            // a single-hue-per-row chart never needs an all-pairs colorblind check across 6 slices.
             const ctxPie = document.getElementById('allocationPieChart').getContext('2d');
             allocationPieChart = new Chart(ctxPie, {
-                type: 'pie',
+                type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: allocationRows.map(r => r.label),
                     datasets: [{
-                        data: allocations,
-                        backgroundColor: colors,
-                        borderWidth: 2,
-                        borderColor: '#fff'
+                        label: 'Allocation',
+                        data: allocationRows.map(r => r.pct),
+                        backgroundColor: allocationRows.map(r => r.color),
+                        borderRadius: 4,
+                        borderSkipped: false,
+                        maxBarThickness: 28
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
                     plugins: {
-                        legend: {
-                            position: 'right'
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    return context.label + ': ' + context.parsed + '%';
-                                }
+                                label: function(context) { return context.parsed.x.toFixed(1) + '%'; }
                             }
                         }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: function(value) { return value + '%'; } }
+                        },
+                        y: { grid: { display: false } }
                     }
                 }
             });
@@ -3338,63 +3136,57 @@
             const ageLabels = yearlyData.map(d => d.age);
             const datasets = [];
 
-            // Add liquid assets (including rentalSurplus)
             const liquidAssets = ['fixedIncome', 'largeCap', 'midCap', 'smallCap', 'rentalSurplus'];
             for (const asset of liquidAssets) {
                 const assetData = yearlyData.map(d => {
                     if (!d.assetValues || !d.assetValues.liquid) return 0;
                     return d.assetValues.liquid[asset] || 0;
                 });
-                
-                // Only add if there's any data
                 const hasData = assetData.some(val => val > 0);
                 if (hasData) {
                     datasets.push({
                         label: assetNames[asset],
                         data: assetData,
                         borderColor: assetColors[asset],
-                        backgroundColor: assetColors[asset] + '40',
+                        backgroundColor: assetColors[asset] + '33',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.35,
+                        pointRadius: 0,
+                        stack: 'assets'
                     });
                 }
             }
 
-            // Add real estate
             const realEstateData = yearlyData.map(d => {
                 if (!d.assetValues || !d.assetValues.realEstate) return 0;
                 return d.assetValues.realEstate.propertyValue || 0;
             });
-            
             const hasRealEstate = realEstateData.some(val => val > 0);
             if (hasRealEstate) {
                 datasets.push({
                     label: assetNames.realEstate,
                     data: realEstateData,
                     borderColor: assetColors.realEstate,
-                    backgroundColor: assetColors.realEstate + '40',
+                    backgroundColor: assetColors.realEstate + '33',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.35,
+                    pointRadius: 0,
+                    stack: 'assets'
                 });
             }
 
             const ctxContribution = document.getElementById('assetContributionChart').getContext('2d');
             assetContributionChart = new Chart(ctxContribution, {
                 type: 'line',
-                data: {
-                    labels: ageLabels,
-                    datasets: datasets
-                },
+                data: { labels: ageLabels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 650, easing: 'easeOutQuart' },
                     plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
+                        legend: { display: true, position: 'top' },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
@@ -3407,27 +3199,18 @@
                     },
                     scales: {
                         y: {
-                            stacked: false,
+                            stacked: true,
                             beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return symbol + formatCurrencyShort(value);
-                                }
-                            }
+                            ticks: { callback: function(value) { return symbol + formatCurrencyShort(value); } }
                         },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Age'
-                            }
-                        }
+                        x: { title: { display: true, text: 'Age' } }
                     }
                 }
             });
         }
-
         function formatCurrency(value) {
-            return value.toLocaleString('en-US', {
+            const locale = selectedCurrency === 'INR' ? 'en-IN' : 'en-US';
+            return value.toLocaleString(locale, {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             });
@@ -3455,21 +3238,29 @@
             }
         }
 
-        function setView(view) {
+        function setView(view, evt) {
             currentView = view;
+            tableExpanded = false;
             document.querySelectorAll('.toggle-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            }
+            updateTable();
+        }
+
+        function toggleTableExpanded() {
+            tableExpanded = !tableExpanded;
             updateTable();
         }
 
         document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', calculateRetirement);
+            input.addEventListener('input', debouncedCalculate);
         });
 
         document.querySelectorAll('#advancedPortfolio input').forEach(input => {
-            input.addEventListener('input', calculateRetirement);
+            input.addEventListener('input', debouncedCalculate);
         });
 
         // Update phase slider when retirement age or life expectancy changes
@@ -3487,10 +3278,70 @@
 
         // Add listeners for phase expense inputs
         ['phase1Expense', 'phase2Expense', 'phase3Expense'].forEach(id => {
-            document.getElementById(id).addEventListener('input', calculateRetirement);
+            document.getElementById(id).addEventListener('input', debouncedCalculate);
         });
 
+        setTheme('dark');
         calculateRetirement();
+    
+
+// ---------------------------------------------------------------------------
+// Enhancement layer (animations only) — wraps the existing render pipeline
+// without touching its calculations. Safe to remove; nothing above depends
+// on it.
+// ---------------------------------------------------------------------------
+(function () {
+    function parseLeadingNumber(text) {
+        var m = text.replace(/,/g, '').match(/(-?\d+(\.\d+)?)/);
+        return m ? parseFloat(m[1]) : null;
+    }
+
+    function animateValue(el, from, to, prefix, suffix, duration) {
+        var start = null;
+        var locale = (typeof selectedCurrency !== 'undefined' && selectedCurrency === 'INR') ? 'en-IN' : 'en-US';
+        function step(ts) {
+            if (start === null) start = ts;
+            var progress = Math.min((ts - start) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = from + (to - from) * eased;
+            el.textContent = prefix + Math.round(current).toLocaleString(locale) + suffix;
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.textContent = prefix + Math.round(to).toLocaleString(locale) + suffix;
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function animateFigures(containerId) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var nodes = container.querySelectorAll('.summary-item p');
+        nodes.forEach(function (p) {
+            var full = p.textContent;
+            var match = full.match(/^([^\d-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/);
+            if (!match) return;
+            var prefix = match[1];
+            var target = parseLeadingNumber(match[2]);
+            var suffix = match[3];
+            if (target === null || !isFinite(target)) return;
+            var prevTarget = parseFloat(p.dataset.animTarget || '0');
+            p.dataset.animTarget = String(target);
+            animateValue(p, prevTarget, target, prefix, suffix, 550);
+        });
+    }
+
+    if (typeof updateUI === 'function') {
+        var __baseUpdateUI = updateUI;
+        updateUI = function () {
+            __baseUpdateUI();
+            animateFigures('summaryGrid');
+            animateFigures('suggestionsGrid');
+        };
+    }
+})();
+
     </script>
 </body>
 </html>
