@@ -877,7 +877,7 @@ tr:hover td { background: var(--surface-elevated); }
                         Current Age
                         <span class="tooltip" data-tip="Your current age in years">?</span>
                     </label>
-                    <input type="number" id="currentAge" value="30" min="18" max="100">
+                    <input type="number" id="currentAge" value="35" min="18" max="100">
                     <span class="error-message" id="currentAge-error"></span>
                 </div>
 
@@ -886,7 +886,7 @@ tr:hover td { background: var(--surface-elevated); }
                         Retirement Age
                         <span class="tooltip" data-tip="Age when you plan to retire">?</span>
                     </label>
-                    <input type="number" id="retirementAge" value="60" min="18" max="100">
+                    <input type="number" id="retirementAge" value="40" min="18" max="100">
                     <span class="error-message" id="retirementAge-error"></span>
                 </div>
 
@@ -895,7 +895,7 @@ tr:hover td { background: var(--surface-elevated); }
                         Life Expectancy
                         <span class="tooltip" data-tip="Expected age at end of life">?</span>
                     </label>
-                    <input type="number" id="lifeExpectancy" value="85" min="18" max="120">
+                    <input type="number" id="lifeExpectancy" value="90" min="18" max="120">
                     <span class="error-message" id="lifeExpectancy-error"></span>
                 </div>
 
@@ -904,7 +904,7 @@ tr:hover td { background: var(--surface-elevated); }
                         <span id="corpusLabel">Current Investment Corpus (₹)</span>
                         <span class="tooltip" data-tip="Your current retirement savings">?</span>
                     </label>
-                    <input type="number" id="currentCorpus" value="8000000" min="0" step="1000">
+                    <input type="number" id="currentCorpus" value="60000000" min="0" step="1000">
                     <span class="error-message" id="currentCorpus-error"></span>
                 </div>
 
@@ -913,7 +913,7 @@ tr:hover td { background: var(--surface-elevated); }
                         <span id="expensesLabel">Monthly Expenses (₹)</span>
                         <span class="tooltip" data-tip="Post-tax monthly expenses in today's value">?</span>
                     </label>
-                    <input type="number" id="monthlyExpenses" value="50000" min="0" step="100">
+                    <input type="number" id="monthlyExpenses" value="200000" min="0" step="100">
                     <span class="error-message" id="monthlyExpenses-error"></span>
                 </div>
 
@@ -2819,7 +2819,7 @@ tr:hover td { background: var(--surface-elevated); }
                 depletionInfo = `
                     <div class="summary-item success">
                         <h3>Corpus Lasts Until</h3>
-                        <p>Age ${depletionAge.toFixed(1)}<br><small style="font-size: 0.8rem; opacity: 0.8;">(${yearsAfterDeath} yrs after death)</small></p>
+                        <p>Age ${depletionAge.toFixed(1)}<br><small style="font-size: 0.8rem; opacity: 0.8;">(${yearsAfterDeath} yrs after expected life)</small></p>
                     </div>
                 `;
             }
